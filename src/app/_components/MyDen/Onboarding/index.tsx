@@ -121,11 +121,11 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
 
   if (step === "details")
     return (
-      <div className="w-full">
+      <div className="w-full overflow-y-auto max-h-[600px]">
         <div className="w-full relative">
           <div
             className={cn(
-              "cursor-pointer w-full relative h-[160px]",
+              "cursor-pointer w-full relative h-[100px]",
               !formData.banner && "bg-primary",
             )}
             onClick={() => document.getElementById("cover-input")?.click()}
@@ -143,9 +143,9 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
               <Image
                 src="/images/pfp-input.png"
                 alt="Cover Input"
-                width={51}
-                height={57}
-                className="absolute top-10 right-10"
+                width={40}
+                height={45}
+                className="absolute top-6 right-6"
               />
             )}
             <input
@@ -157,31 +157,31 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             />
           </div>
           <div
-            className="cursor-pointer absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 h-28 flex items-center justify-center rounded-full group"
+            className="cursor-pointer absolute -bottom-6 left-1/2 -translate-x-1/2 w-20 h-20 flex items-center justify-center rounded-full group"
             onClick={() => document.getElementById("pfp-input")?.click()}
           >
             <Image
               src="/images/pfp-input.png"
               alt="Cover Input"
-              width={51}
-              height={57}
+              width={40}
+              height={45}
               className="hidden group-hover:block absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10"
             />
             {formData.pfp ? (
               <Image
                 src={URL.createObjectURL(formData.pfp)}
                 alt="PFP"
-                width={112}
-                height={112}
-                className="rounded-full w-28 h-28 object-cover group-hover:brightness-50"
+                width={80}
+                height={80}
+                className="rounded-full w-20 h-20 object-cover group-hover:brightness-50"
               />
             ) : (
               <Image
                 src="/images/default-channel-logo.png"
                 alt="PFP Input"
-                width={112}
-                height={112}
-                className="rounded-full w-28 h-28 object-cover group-hover:brightness-50"
+                width={80}
+                height={80}
+                className="rounded-full w-20 h-20 object-cover group-hover:brightness-50"
               />
             )}
             <input
@@ -194,9 +194,9 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
           </div>
         </div>
 
-        <div className="mt-10 px-6">
-          <div className="flex items-start gap-4">
-            <div className="flex flex-1 flex-col gap-2">
+        <div className="mt-8 px-4">
+          <div className="flex items-start gap-3">
+            <div className="flex flex-1 flex-col gap-1.5">
               <label className="uppercase text-xs" htmlFor="channel-name">
                 Channel Name
               </label>
@@ -204,7 +204,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
                 maxLength={30}
                 id="channel-name"
                 placeholder="@mizanxali's Den"
-                className="text-sm py-6 shadow-small"
+                className="text-sm py-4 shadow-small"
                 value={formData.channelName}
                 onChange={(e) =>
                   setFormData({
@@ -215,7 +215,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
               />
             </div>
 
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-1.5">
               <div className="flex items-center gap-2">
                 <label className="uppercase text-xs" htmlFor="symbol">
                   Channel Token Ticker
@@ -240,12 +240,12 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
               </div>
               {formData.token.isClanker ? (
                 <div className="flex rounded-base items-stretch shadow-small">
-                  <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
+                  <div className="bg-black text-sm text-white px-4 py-3 rounded-l-base">
                     $
                   </div>
                   <Input
                     maxLength={10}
-                    className="flex-1 outline-none text-sm px-2.5 py-4 h-full border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    className="flex-1 outline-none text-sm px-2.5 py-3 h-full border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
                     id="symbol"
                     placeholder="BTC"
                     value={formData.token.symbol}
@@ -302,14 +302,14 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             </div>
           </div>
 
-          <div className="mt-1">
+          <div className="mt-2">
             <div className="flex flex-col gap-2">
               <label className="uppercase text-xs" htmlFor="channel-about">
                 About Channel
               </label>
               <Textarea
                 id="channel-about"
-                className="text-sm h-36"
+                className="text-sm h-20"
                 placeholder="Write about your channel here"
                 value={formData.channelAbout}
                 onChange={(e) =>
@@ -322,18 +322,18 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center gap-4">
+          <div className="mt-3 flex items-center gap-3">
             <div className="flex flex-col gap-2 flex-1">
               <label className="uppercase text-xs" htmlFor="channel-handle">
                 Channel Handle
               </label>
               <div className="flex items-stretch rounded-base shadow-small">
-                <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
+                <div className="bg-black text-sm text-white px-4 py-3 rounded-l-base">
                   den.show/
                 </div>
                 <Input
                   maxLength={30}
-                  className="flex-1 outline-none text-sm px-2.5 py-4 h-full border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="flex-1 outline-none text-sm px-2.5 py-3 h-full border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   type="text"
                   placeholder="your-channel-handle"
                   value={formData.channelHandle}
@@ -374,7 +374,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
                   setFormData({ ...formData, language: value })
                 }
               >
-                <SelectTrigger className="h-12 w-full shadow-small">
+                <SelectTrigger className="h-10 w-full shadow-small">
                   <SelectValue
                     placeholder="Select a language for chat"
                     className="py-1"
@@ -398,7 +398,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 mt-4">
+          <div className="flex items-center space-x-2 mt-3">
             <Switch
               id="18-plus"
               checked={formData.nsfw}
@@ -411,7 +411,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             </Label>
           </div>
 
-          <div className="flex items-center space-x-2 mt-4">
+          <div className="flex items-center space-x-2 mt-3">
             <Switch
               id="tnc"
               checked={formData.tncAccepted}
@@ -425,7 +425,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             </Label>
           </div>
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-4 flex justify-end">
             <Button
               className="w-36"
               onClick={() => setStep("tier")}
@@ -445,7 +445,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
 
   if (step === "tier")
     return (
-      <>
+      <div className="w-full overflow-y-auto max-h-[600px]">
         <FanPassModalContent
           channelProfileUrl={"/images/default-channel-logo.png"}
           channelName={formData.channelName}
@@ -453,7 +453,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
           creatorTokenSymbol={formData.token.symbol}
           isCreatingChannel
         />
-        <div className="mt-6 flex justify-end">
+        <div className="mt-4 flex justify-end px-4">
           <Button
             className="w-36"
             onClick={handleCreateDen}
@@ -462,7 +462,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             {isCreatingChannel ? "Creating..." : "Create Den"}
           </Button>
         </div>
-      </>
+      </div>
     );
 };
 

@@ -48,6 +48,9 @@ const LiveStreams = () => {
       <div className="flex items-center justify-between md:pr-6">
         <div className="flex items-center gap-1">
           <div>
+            <span className="text-black font-semibold text-lg font-instrument-sans tracking-tighter">
+              Creators{" "}
+            </span>
             <span className="text-[#FF4141] text-lg font-cream-medium tracking-tighter">
               Live Now
             </span>

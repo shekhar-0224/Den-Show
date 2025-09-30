@@ -68,22 +68,28 @@ const StreamCard = ({
   }, []);
 
   const liveBadge = (
-    <div className="absolute top-1.5 right-1.5 bg-[#FF4141] text-white text-xs px-1.5 py-0.5 rounded font-semibold flex items-center gap-1 z-20">
+    <div className="bg-[#FF4141] text-white text-xs px-1.5 py-0.5 rounded font-semibold flex items-center gap-1">
       <div className="w-2 h-2 bg-white rounded-full" />
       <span>LIVE</span>
     </div>
   );
 
   const viewsBadge = (
-    <div className="absolute top-1.5 right-1.5 bg-black/80 text-white text-sm px-2 py-1 rounded-lg font-semibold flex items-center gap-1 z-20">
+    <div className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-semibold flex items-center gap-1">
       <Image
-        src="/icons/views.svg"
+        src="/icons/watching.svg"
         alt="Views"
-        width={16}
-        height={16}
-        className="mr-1"
+        width={12}
+        height={12}
       />
-      <div>{views}</div>
+      <span className="font-instrument-sans font-semibold">{views}</span>
+    </div>
+  );
+
+  const badgesContainer = (
+    <div className="absolute top-1.5 right-1.5 flex items-center gap-1 z-20">
+      {liveBadge}
+      {viewsBadge}
     </div>
   );
 
@@ -97,26 +103,26 @@ const StreamCard = ({
   return (
     <Card
       className={cn(
-        "p-2.5 w-[298px] gap-4 flex-shrink-0 justify-between", //reduce width by 20%
+        "p-2.5 w-[355px] gap-4 flex-shrink-0 justify-between",
         className,
       )}
     >
       <CardHeader className="p-0 relative">
         <div
-          className="relative w-[270px] h-[152px] overflow-hidden rounded-md mx-auto"
+          className="relative w-[330px] h-[200px] overflow-hidden rounded-none mx-auto"
           onMouseEnter={hlsUrl && !didntStart ? onEnter : undefined}
           onMouseLeave={hlsUrl && !didntStart ? onLeave : undefined}
         >
           <Image
             src={thumbnail}
             alt="Thumbnail"
-            width={270}
-            height={152}
+            width={330}
+            height={200}
             className={cn(
               "object-cover transition-opacity duration-150",
               showPreview ? "opacity-0" : "opacity-100",
             )}
-            style={{ width: 270, height: 152 }}
+            style={{ width: 330, height: 200 }}
             priority={false}
           />
 
@@ -129,7 +135,7 @@ const StreamCard = ({
             </div>
           ) : null}
 
-          {isLive ? liveBadge : !clipId && !didntStart ? viewsBadge : null}
+          {isLive ? badgesContainer : !clipId && !didntStart ? viewsBadge : null}
         </div>
 
         <CardTitle className="font-semibold text-sm mt-1 line-clamp-2">
@@ -162,7 +168,7 @@ const StreamCard = ({
           <Button
             disabled={didntStart}
             onClick={goWatch}
-            className="py-1 px-2 text-sm"
+            className="py-1 px-3 text-sm w-[127px]"
           >
             {didntStart ? "Didn't Start" : isLive ? "Enter Den" : "Watch"}
           </Button>
