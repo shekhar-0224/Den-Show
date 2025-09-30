@@ -1,16 +1,25 @@
 import type { QueryCtx } from "../_generated/server";
 
-export async function getUserFromCtx(ctx: QueryCtx) {
-  const userIdentity = await ctx.auth.getUserIdentity();
+export const getUserFromCtx = async (ctx: QueryCtx) => {
+  try {
+    const userIdentity = await ctx.auth.getUserIdentity();
 
-  console.log({ userIdentity });
+    console.log({ userIdentity });
 
-  if (userIdentity === null) {
-    return "DED";
+    if (userIdentity === null) {
+      return null;
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_privyId", (q) =>
+        q.eq("privyId", userIdentity.tokenIdentifier)
+      )
+      .first();
+
+    return user;
+  } catch (error) {
+    console.log("Error parsing linked accounts:", error);
+    return null;
   }
-  // const user = await ctx.db.get("users", userIdentity.id);
-
-  const user = "gg";
-
-  return user;
-}
+};
