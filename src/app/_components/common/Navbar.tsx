@@ -15,6 +15,7 @@ import StartStream from "../GoLive/StartStream";
 import Onboarding from "../MyDen/Onboarding";
 import GlobalSearch from "./GlobalSearch";
 import LoginButton from "./LoginButton";
+import { TestComp } from "./TestComp";
 
 interface NavbarProps {
   isAuthenticated: boolean;
@@ -22,8 +23,6 @@ interface NavbarProps {
 }
 
 const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
-  const router = useRouter();
-
   const [isStartStreamOpen, setIsStartStreamOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
@@ -147,18 +146,17 @@ const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
               </DialogContent>
             </Dialog>
           ))}
+        <TestComp />
         {isAuthenticated ? (
-          <>
-            <Link href="/profile">
-              <Image
-                src="/images/default-pfp.png"
-                alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full border border-border"
-              />
-            </Link>
-          </>
+          <Link href="/profile">
+            <Image
+              src="/images/default-pfp.png"
+              alt="Profile"
+              width={40}
+              height={40}
+              className="rounded-full border border-border"
+            />
+          </Link>
         ) : (
           <LoginButton />
         )}

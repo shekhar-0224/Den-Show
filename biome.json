@@ -15,11 +15,21 @@
   },
   "linter": {
     "enabled": true,
+    "domains": {
+      "next": "recommended"
+    },
     "rules": {
       "recommended": true,
       "a11y": {
         "noSvgWithoutTitle": "off",
-        "useKeyWithClickEvents": "off"
+        "useKeyWithClickEvents": "off",
+        "noStaticElementInteractions": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "warn"
+      },
+      "nursery": {
+        "noFloatingPromises": "error"
       }
     }
   },
