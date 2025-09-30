@@ -6,7 +6,5 @@ export const TestComp = () => {
   const gg = useQuery(api.user.getCurrentUser);
   const { logout } = usePrivy();
 
-  console.log({ gg });
-
   return <div onClick={logout}>TestComp</div>;
 };

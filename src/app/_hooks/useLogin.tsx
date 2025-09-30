@@ -1,5 +1,6 @@
 import { usePrivy, useLogin as usePrivyLogin } from "@privy-io/react-auth";
 import { useAction } from "convex/react";
+import posthog from "posthog-js";
 import { api } from "../../../convex/_generated/api";
 
 export default function useLogin() {
@@ -7,8 +8,16 @@ export default function useLogin() {
   const { logout } = usePrivy();
 
   const { login: privyLogin } = usePrivyLogin({
-    onComplete: async () => {
+    onComplete: async ({ user, isNewUser, loginMethod, loginAccount }) => {
+      console.log("-------------------------------------");
+      console.log({ user, isNewUser });
+      console.log("-------------------------------------");
+
       try {
+        if (isNewUser)
+          posthog.capture("sign-up", { loginMethod, loginAccount });
+        else posthog.capture("login", { loginMethod, ...loginAccount });
+
         const res = await setupUser();
 
         console.log({ res });
