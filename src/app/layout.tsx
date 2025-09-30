@@ -38,7 +38,7 @@ const instrumentSans = Instrument_Sans({
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const token = await auth();
+  const isAuthed = await auth();
 
   return (
     <html
@@ -46,7 +46,7 @@ export default async function RootLayout({
       className={cn(
         instrumentSans.variable,
         creamRegular.variable,
-        creamMedium.variable,
+        creamMedium.variable
       )}
     >
       <body className="font-sans">
@@ -55,10 +55,7 @@ export default async function RootLayout({
           {/* <Toaster position="bottom-right" reverseOrder={false} /> */}
           <Toaster />
           <div className="flex flex-col h-screen">
-            <Navbar
-              isAuthenticated={!!token}
-              isChannelOwner={!!token?.channelId}
-            />
+            <Navbar isAuthenticated={isAuthed} />
             {/* <div className="mac-13:h-[111%] mac-13:w-[111%] mac-13:origin-[0%_0%] mac-13:scale-[0.9]"> */}
             <div className="flex-1 overflow-y-scroll">{children}</div>
           </div>

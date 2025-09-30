@@ -7,7 +7,7 @@ import {
   RoomServiceClient,
 } from "livekit-server-sdk";
 import { cookies } from "next/headers";
-import { http, createPublicClient } from "viem";
+import { createPublicClient, http } from "viem";
 import { base } from "viem/chains";
 import { env } from "~/env";
 
@@ -27,34 +27,38 @@ type TokenPayload = {
 export const ROOM_SERVICE_CLIENT = new RoomServiceClient(
   env.NEXT_PUBLIC_LIVEKIT_URL,
   env.LIVEKIT_API_KEY,
-  env.LIVEKIT_API_SECRET,
+  env.LIVEKIT_API_SECRET
 );
 
 export const INGRESS_CLIENT = new IngressClient(
   env.NEXT_PUBLIC_LIVEKIT_URL,
   env.LIVEKIT_API_KEY,
-  env.LIVEKIT_API_SECRET,
+  env.LIVEKIT_API_SECRET
 );
 
 export const EGRESS_CLIENT = new EgressClient(env.NEXT_PUBLIC_LIVEKIT_URL);
 
+export const createPrivyClient = () => {
+  return new PrivyClient(env.NEXT_PUBLIC_PRIVY_APP_ID, env.PRIVY_APP_SECRET);
+};
+
 export const auth = async () => {
-  const c = await cookies();
+  const cookieAuthToken = (await cookies()).get("privy-token");
 
-  const token = c.get(TOKEN_COOKIE)?.value;
+  if (cookieAuthToken) {
+    const client = createPrivyClient();
 
-  if (!token) return null;
+    try {
+      await client.verifyAuthToken(cookieAuthToken.value);
 
-  try {
-    const data = jwt.verify(token, env.JWT_SECRET) as TokenPayload;
-
-    return data;
-  } catch (error) {
-    console.error("error verifying token", error);
-    c.delete(TOKEN_COOKIE);
-
-    return null;
+      return true;
+    } catch (error) {
+      console.error("Error verifying auth token:", error);
+      return false;
+    }
   }
+
+  return false;
 };
 
 export const createAndSetToken = async (data: TokenPayload) => {
@@ -70,7 +74,7 @@ export const createAndSetToken = async (data: TokenPayload) => {
     env.JWT_SECRET,
     {
       expiresIn: "30d",
-    },
+    }
   );
 
   console.log("setting token", j);
@@ -93,7 +97,7 @@ export const publicClient = createPublicClient({
 
 export async function rpc<T = unknown>(
   method: string,
-  params: unknown[],
+  params: unknown[]
 ): Promise<T> {
   const res = await fetch(
     `https://base-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`,
@@ -101,7 +105,7 @@ export async function rpc<T = unknown>(
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ id: 1, jsonrpc: "2.0", method, params }),
-    },
+    }
   );
   const body = await res.json();
   if (!res.ok || body.error) {
@@ -128,7 +132,7 @@ export const verifyPrivyToken = async () => {
 
   const privy = new PrivyClient(
     env.NEXT_PUBLIC_PRIVY_APP_ID,
-    env.PRIVY_APP_SECRET,
+    env.PRIVY_APP_SECRET
   );
 
   try {

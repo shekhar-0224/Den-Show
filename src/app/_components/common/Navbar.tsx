@@ -1,8 +1,8 @@
 "use client";
 
+import { usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -19,10 +19,19 @@ import { TestComp } from "./TestComp";
 
 interface NavbarProps {
   isAuthenticated: boolean;
-  isChannelOwner: boolean;
 }
 
-const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
+const Navbar = ({ isAuthenticated }: NavbarProps) => {
+  const { user } = usePrivy();
+
+  const isChannelOwner = false;
+
+  const profilePic =
+    user?.linkedAccounts.find((acc) => acc.type === "twitter_oauth")
+      ?.profilePictureUrl ||
+    user?.linkedAccounts.find((acc) => acc.type === "farcaster")?.pfp ||
+    "/images/default-pfp.png";
+
   const [isStartStreamOpen, setIsStartStreamOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
@@ -147,10 +156,10 @@ const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
             </Dialog>
           ))}
         <TestComp />
-        {isAuthenticated ? (
+        {user ? (
           <Link href="/profile">
             <Image
-              src="/images/default-pfp.png"
+              src={profilePic}
               alt="Profile"
               width={40}
               height={40}
