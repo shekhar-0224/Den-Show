@@ -1,9 +1,10 @@
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import { action, internalMutation, query } from "./_generated/server";
-import { getUserFromCtx } from "./model/users";
+import { getUserFromCtx } from "./utils/users";
 import { linkedAccountsSchema } from "./validators";
 
+// TODO: leverage schedule action to create a user, instead of doing it from client side action
 export const getCurrentUser = query({
   handler: async (ctx) => {
     const user = await getUserFromCtx(ctx);

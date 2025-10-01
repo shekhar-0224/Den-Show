@@ -4,8 +4,6 @@ export const getUserFromCtx = async (ctx: QueryCtx) => {
   try {
     const userIdentity = await ctx.auth.getUserIdentity();
 
-    console.log({ lol: userIdentity });
-
     if (userIdentity === null) {
       return null;
     }

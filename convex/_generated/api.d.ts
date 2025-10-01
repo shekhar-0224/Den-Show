@@ -14,8 +14,10 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as channel from "../channel.js";
-import type * as model_users from "../model/users.js";
+import type * as file from "../file.js";
+import type * as mux from "../mux.js";
 import type * as user from "../user.js";
+import type * as utils_users from "../utils/users.js";
 import type * as validators from "../validators.js";
 
 /**
@@ -28,8 +30,10 @@ import type * as validators from "../validators.js";
  */
 declare const fullApi: ApiFromModules<{
   channel: typeof channel;
-  "model/users": typeof model_users;
+  file: typeof file;
+  mux: typeof mux;
   user: typeof user;
+  "utils/users": typeof utils_users;
   validators: typeof validators;
 }>;
 export declare const api: FilterApi<
