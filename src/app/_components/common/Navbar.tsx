@@ -56,8 +56,8 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
               />
             </div>
           </Link> */}
-          {isAuthenticated &&
-            (isChannelOwner ? (
+          {isAuthenticated ? (
+            isChannelOwner ? (
               <Link href="/my-den" className="hover:underline">
                 <div className="flex items-center gap-1.5">
                   <div className="text-lg font-cream-medium tracking-tighter">
@@ -98,12 +98,13 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
                   />
                 </DialogContent>
               </Dialog>
-            ))}
+            )
+          ) : null}
         </div>
       </div>
       <div className="flex items-center gap-4">
-        {isAuthenticated &&
-          (isChannelOwner ? (
+        {isAuthenticated ? (
+          isChannelOwner ? (
             <Dialog
               open={isStartStreamOpen}
               onOpenChange={setIsStartStreamOpen}
@@ -154,7 +155,8 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
                 />
               </DialogContent>
             </Dialog>
-          ))}
+          )
+        ) : null}
         <TestComp />
         {user ? (
           <Link href="/profile">

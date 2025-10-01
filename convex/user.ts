@@ -40,7 +40,7 @@ export const setupUser = action({
 
       console.log({ dsfsdfdsgs: userIdentity });
 
-      if (userIdentity === null || typeof userIdentity.subject !== "string") {
+      if (!userIdentity || typeof userIdentity.subject !== "string") {
         return false;
       }
 
