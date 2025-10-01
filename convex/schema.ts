@@ -1,6 +1,14 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+export const streamStates = v.union(
+  v.literal("scheduled"),
+  v.literal("pending"),
+  v.literal("live"),
+  v.literal("ended"),
+  v.literal("cancelled")
+);
+
 export default defineSchema({
   users: defineTable({
     privyId: v.string(),
@@ -55,7 +63,11 @@ export default defineSchema({
     tags: v.array(v.string()),
     thumbnailPicId: v.optional(v.id("_storage")),
     accessType: v.union(v.literal("everyone"), v.literal("fans")),
-    scheduledFor: v.optional(v.number()),
     allowClipping: v.boolean(),
-  }),
+    state: streamStates,
+    scheduledStartTime: v.optional(v.number()),
+    playbackId: v.optional(v.string()), // TODO update this
+  })
+    .index("by_channelId", ["channelId"])
+    .index("by_userId", ["userId"]),
 });

@@ -27,3 +27,17 @@ export const createMuxStreamKey = internalAction({
     });
   },
 });
+
+export const changeLiveStreamState = internalAction({
+  args: {
+    muxStreamId: v.string(),
+    state: v.union(v.literal("enable"), v.literal("disable")),
+  },
+  handler: async (_, args) => {
+    if (args.state === "enable") {
+      await mux.video.liveStreams.enable(args.muxStreamId);
+    } else {
+      await mux.video.liveStreams.disable(args.muxStreamId);
+    }
+  },
+});
