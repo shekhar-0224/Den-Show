@@ -1,3 +1,5 @@
+"use client";
+
 import { usePrivy, useLogin as usePrivyLogin } from "@privy-io/react-auth";
 import { useAction } from "convex/react";
 import posthog from "posthog-js";
@@ -29,6 +31,12 @@ export default function useLogin() {
         console.error("Error setting up user:", error);
         void logout();
       }
+    },
+
+    onError: (error) => {
+      console.error("Login error:", error);
+      alert("Login error: ");
+      posthog.capture("login-error", { error });
     },
   });
 
