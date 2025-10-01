@@ -16,18 +16,28 @@ export default defineSchema({
     .index("by_username", ["username"])
     .index("by_email", ["email"]),
 
-  channel: defineTable({
+  channels: defineTable({
     userId: v.id("users"),
     name: v.string(),
     bio: v.string(),
     handle: v.string(),
-    profilePicUrl: v.string(),
-    bannerPicUrl: v.string(),
+    profilePicId: v.optional(v.string()),
+    bannerPicId: v.optional(v.string()),
     language: v.string(),
     fanPassValue: v.number(),
     nsfw: v.boolean(),
-    tickerName: v.string(),
-    tickerAddress: v.string(),
-    tickerSource: v.union(v.literal("zora"), v.literal("clanker")),
-  }),
+    token: v.object({
+      address: v.string(),
+      symbol: v.string(),
+      source: v.union(v.literal("zora"), v.literal("clanker")),
+    }),
+  })
+    .index("by_handle", ["handle"])
+    .index("by_userId", ["userId"])
+    .searchIndex("search_channel_by_name", {
+      searchField: "name",
+    })
+    .searchIndex("search_channel_by_handle", {
+      searchField: "handle",
+    }),
 });

@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as channel from "../channel.js";
 import type * as model_users from "../model/users.js";
 import type * as user from "../user.js";
 import type * as validators from "../validators.js";
@@ -26,6 +27,7 @@ import type * as validators from "../validators.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  channel: typeof channel;
   "model/users": typeof model_users;
   user: typeof user;
   validators: typeof validators;
