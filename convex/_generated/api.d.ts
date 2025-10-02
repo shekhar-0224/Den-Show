@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as channel from "../channel.js";
 import type * as file from "../file.js";
+import type * as http from "../http.js";
 import type * as mux from "../mux.js";
 import type * as stream from "../stream.js";
 import type * as user from "../user.js";
@@ -32,6 +33,7 @@ import type * as validators from "../validators.js";
 declare const fullApi: ApiFromModules<{
   channel: typeof channel;
   file: typeof file;
+  http: typeof http;
   mux: typeof mux;
   stream: typeof stream;
   user: typeof user;

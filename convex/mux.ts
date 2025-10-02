@@ -1,3 +1,5 @@
+"use node";
+
 import Mux from "@mux/mux-node";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
@@ -6,6 +8,7 @@ import { internalAction } from "./_generated/server";
 const mux = new Mux({
   tokenId: process.env.MUX_TOKEN_ID,
   tokenSecret: process.env.MUX_TOKEN_SECRET,
+  webhookSecret: process.env.MUX_WEBHOOK_SECRET,
 });
 
 export const createMuxStreamKey = internalAction({
@@ -38,6 +41,24 @@ export const changeLiveStreamState = internalAction({
       await mux.video.liveStreams.enable(args.muxStreamId);
     } else {
       await mux.video.liveStreams.disable(args.muxStreamId);
+    }
+  },
+});
+
+export const handleWebhook = internalAction({
+  args: {
+    headers: v.any(),
+    body: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const event = mux.webhooks.unwrap(args.body, args.headers);
+
+    console.log("Mux Webhook Event:", event);
+
+    switch (event.type) {
+      case "video.live_stream.active": {
+        break;
+      }
     }
   },
 });
