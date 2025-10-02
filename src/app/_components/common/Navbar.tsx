@@ -1,6 +1,6 @@
 "use client";
 
-import { useConvexAuth } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import { api } from "../../../../convex/_generated/api";
 import StartStream from "../GoLive/StartStream";
 import Onboarding from "../MyDen/Onboarding";
 import GlobalSearch from "./GlobalSearch";
@@ -18,7 +19,9 @@ import LoginButton from "./LoginButton";
 import { TestComp } from "./TestComp";
 
 const Navbar = () => {
-  const isChannelOwner = false; // TODO: fetch from user state
+  const myChannel = useQuery(api.channel.getMyChannel);
+
+  const isChannelOwner = !!myChannel;
 
   // TODO: use this loading state to avoid flicker on initial load
   const { isAuthenticated, isLoading: _ } = useConvexAuth();

@@ -37,7 +37,7 @@ export default defineSchema({
     token: v.object({
       address: v.string(),
       symbol: v.string(),
-      source: v.union(v.literal("zora"), v.literal("clanker")),
+      source: v.union(v.literal("other"), v.literal("clanker")),
     }),
   })
     .index("by_handle", ["handle"])

@@ -1,3 +1,4 @@
+import { useWallets } from "@privy-io/react-auth";
 import { Label } from "@radix-ui/react-label";
 import { useMutation as useCvxMutation } from "convex/react";
 import Image from "next/image";
@@ -26,7 +27,6 @@ import { cn } from "~/lib/utils";
 import { api } from "../../../../../convex/_generated/api";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 import { useFileUpload } from "../../../_hooks/useFileUpload";
-
 import FanPassModalContent from "../../common/FanPass/FanPassModalContent";
 import TokenSearch from "./TokenSearch";
 
@@ -37,6 +37,10 @@ interface OnboardingProps {
 }
 
 const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
+  const { wallets } = useWallets();
+
+  const embedWallet = wallets?.find((w) => w.connectorType === "embedded");
+
   const [step, setStep] = useState<"details" | "tier">("details");
 
   const { mutateAsync } = useFileUpload();
@@ -86,6 +90,11 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
   const handleCreateDen = async () => {
     if (!isFormValid) return;
 
+    if (!embedWallet?.address) {
+      toast.error("No embedded wallet found, please sign in again.");
+      return;
+    }
+
     try {
       setIsCreatingChannel(true);
 
@@ -109,11 +118,12 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
         bannerPicId,
         profilePicId,
         language: formData.language,
+        creatorAddress: embedWallet.address,
         // TODO: hande this logix
         token: {
           address: formData.token.address ?? "TODO",
           symbol: formData.token.symbol,
-          source: formData.token.isClanker ? "clanker" : "zora",
+          source: formData.token.isClanker ? "clanker" : "other",
         },
       });
 

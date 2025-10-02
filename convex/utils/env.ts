@@ -6,6 +6,7 @@ const envSchema = z.object({
   MUX_TOKEN_ID: z.string(),
   MUX_TOKEN_SECRET: z.string(),
   MUX_WEBHOOK_SECRET: z.string(),
+  ADMIN_PRIVATE_KEY: z.string(),
 });
 
 const createEnv = () => {

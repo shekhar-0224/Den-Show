@@ -3,7 +3,6 @@
 import { type GetTokensResponse, getTokens } from "@coinbase/onchainkit/api";
 import type { Token } from "@coinbase/onchainkit/token";
 import { useQuery } from "@tanstack/react-query";
-import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { cn } from "~/lib/utils";
@@ -120,13 +119,13 @@ const TokenSearch = ({ onTokenSelect }: TokenSearchProps) => {
               </div>
             ) : (
               <div className="p-1">
-                {tokens.map((token, index) => (
+                {tokens.map((token) => (
                   <div
                     key={token.address}
                     onClick={() => handleTokenSelect(token)}
                     className={cn(
                       "flex items-center gap-2 px-3 py-2 text-sm cursor-pointer rounded hover:bg-gray-100 transition-colors",
-                      selectedToken?.address === token.address && "bg-blue-50",
+                      selectedToken?.address === token.address && "bg-blue-50"
                     )}
                   >
                     <div className="flex flex-col flex-1 min-w-0">

@@ -3,6 +3,23 @@ import { internal } from "./_generated/api";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { getUserFromCtx } from "./utils/users";
 
+export const updateTokenAddress = internalMutation({
+  args: {
+    channelId: v.id("channels"),
+    address: v.string(),
+    symbol: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.channelId, {
+      token: {
+        address: args.address,
+        symbol: args.symbol,
+        source: "clanker",
+      },
+    });
+  },
+});
+
 export const createChannel = mutation({
   args: {
     name: v.string(),
@@ -16,8 +33,9 @@ export const createChannel = mutation({
     token: v.object({
       address: v.string(),
       symbol: v.string(),
-      source: v.union(v.literal("zora"), v.literal("clanker")),
+      source: v.union(v.literal("other"), v.literal("clanker")),
     }),
+    creatorAddress: v.string(),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromCtx(ctx);
@@ -58,6 +76,22 @@ export const createChannel = mutation({
     await ctx.scheduler.runAfter(0, internal.mux.createMuxStreamKey, {
       channelId,
     });
+
+    // TODO: update this default URL
+    const profilePicUrl = args.profilePicId
+      ? ((await ctx.storage.getUrl(args.profilePicId)) ??
+        "https://den-lilac.vercel.app/images/default-channel-logo.png")
+      : "https://den-lilac.vercel.app/images/default-channel-logo.png";
+
+    if (args.token.source === "clanker") {
+      await ctx.scheduler.runAfter(0, internal.token.deployToken, {
+        creatorAddress: args.creatorAddress,
+        ticker: args.token.symbol,
+        channelId,
+        channelName: args.name,
+        profilePicUrl,
+      });
+    }
   },
 });
 
@@ -81,7 +115,7 @@ export const getMyChannel = query({
     const user = await getUserFromCtx(ctx);
 
     if (!user) {
-      throw new Error("Not authenticated");
+      return null;
     }
 
     const channel = await ctx.db
@@ -89,7 +123,7 @@ export const getMyChannel = query({
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .first();
 
-    return channel ?? null;
+    return channel;
   },
 });
 

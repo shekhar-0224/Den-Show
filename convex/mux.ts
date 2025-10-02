@@ -4,11 +4,12 @@ import Mux from "@mux/mux-node";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { internalAction } from "./_generated/server";
+import { env } from "./utils/env";
 
 const mux = new Mux({
-  tokenId: process.env.MUX_TOKEN_ID,
-  tokenSecret: process.env.MUX_TOKEN_SECRET,
-  webhookSecret: process.env.MUX_WEBHOOK_SECRET,
+  tokenId: env.MUX_TOKEN_ID,
+  tokenSecret: env.MUX_TOKEN_SECRET,
+  webhookSecret: env.MUX_WEBHOOK_SECRET,
 });
 
 export const createMuxStreamKey = internalAction({
@@ -47,7 +48,7 @@ export const changeLiveStreamState = internalAction({
 
 export const handleWebhook = internalAction({
   args: {
-    headers: v.any(),
+    headers: v.record(v.string(), v.string()),
     body: v.string(),
   },
   handler: async (ctx, args) => {
