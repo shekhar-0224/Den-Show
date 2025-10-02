@@ -177,3 +177,22 @@ export const searchChannel = query({
     return Array.from(channelMap.values());
   },
 });
+
+export const getTrendingChannels = query({
+  handler: async (ctx) => {
+    const channels = await ctx.db.query("channels").order("desc").take(10);
+
+    return await Promise.all(
+      channels.map(async (channel) => {
+        const profilePicUrl = channel.profilePicId
+          ? await ctx.storage.getUrl(channel.profilePicId)
+          : null;
+
+        return {
+          ...channel,
+          profilePicUrl,
+        };
+      })
+    );
+  },
+});
