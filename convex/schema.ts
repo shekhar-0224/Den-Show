@@ -67,7 +67,9 @@ export default defineSchema({
     state: streamStates,
     scheduledStartTime: v.optional(v.number()),
     playbackId: v.optional(v.string()), // TODO update this
+    lastUpdatedAt: v.number(),
   })
     .index("by_channelId", ["channelId"])
-    .index("by_userId", ["userId"]),
+    .index("by_userId", ["userId"])
+    .index("by_state_lastUpdatedAt", ["state", "lastUpdatedAt"]),
 });
