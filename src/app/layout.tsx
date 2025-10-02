@@ -5,7 +5,6 @@ import { Instrument_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import { Toaster } from "~/components/ui/sonner";
 import { cn } from "~/lib/utils";
-import { auth } from "~/server/lib/server-utils";
 import BodyBackgroundManager from "./_components/common/BodyBackgroundManager";
 import Navbar from "./_components/common/Navbar";
 import Providers from "./_components/common/Providers";
@@ -38,8 +37,6 @@ const instrumentSans = Instrument_Sans({
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const isAuthed = await auth();
-
   return (
     <html
       lang="en"
@@ -55,7 +52,7 @@ export default async function RootLayout({
           {/* <Toaster position="bottom-right" reverseOrder={false} /> */}
           <Toaster />
           <div className="flex flex-col h-screen">
-            <Navbar isAuthenticated={isAuthed} />
+            <Navbar />
             {/* <div className="mac-13:h-[111%] mac-13:w-[111%] mac-13:origin-[0%_0%] mac-13:scale-[0.9]"> */}
             <div className="flex-1 overflow-y-scroll">{children}</div>
           </div>

@@ -18,7 +18,7 @@
     "dev": "npm-run-all --parallel dev:frontend dev:backend",
     "dev:frontend": "next dev --turbo",
     "dev:backend": "convex dev",
-    "predev": "convex dev --until-success && convex dashboard"
+    "predev": "convex dev --until-success"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.901.0",

@@ -1,8 +1,8 @@
 "use client";
 
+import { useConvexAuth } from "convex/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -15,15 +15,13 @@ import StartStream from "../GoLive/StartStream";
 import Onboarding from "../MyDen/Onboarding";
 import GlobalSearch from "./GlobalSearch";
 import LoginButton from "./LoginButton";
+import { TestComp } from "./TestComp";
 
-interface NavbarProps {
-  isAuthenticated: boolean;
-}
-
-const Navbar = ({ isAuthenticated }: NavbarProps) => {
-  const router = useRouter();
-
+const Navbar = () => {
   const isChannelOwner = false; // TODO: fetch from user state
+
+  // TODO: use this loading state to avoid flicker on initial load
+  const { isAuthenticated, isLoading: _ } = useConvexAuth();
 
   const [isStartStreamOpen, setIsStartStreamOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
@@ -179,6 +177,7 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
         ) : (
           <LoginButton />
         )}
+        <TestComp />
       </div>
     </div>
   );

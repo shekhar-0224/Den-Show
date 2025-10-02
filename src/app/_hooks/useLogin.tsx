@@ -10,22 +10,24 @@ export default function useLogin() {
   const { logout } = usePrivy();
 
   const { login: privyLogin } = usePrivyLogin({
-    onComplete: async ({ user, isNewUser, loginMethod, loginAccount }) => {
-      console.log("-------------------------------------");
-      console.log({ user, isNewUser });
-      console.log("-------------------------------------");
-
+    onComplete: async ({
+      isNewUser,
+      loginMethod,
+      loginAccount,
+      wasAlreadyAuthenticated,
+    }) => {
       try {
         if (isNewUser)
           posthog.capture("sign-up", { loginMethod, loginAccount });
-        else posthog.capture("login", { loginMethod, ...loginAccount });
+        else if (!wasAlreadyAuthenticated)
+          posthog.capture("login", { loginMethod, ...loginAccount });
 
-        const res = await setupUser();
+        if (!wasAlreadyAuthenticated) {
+          const res = await setupUser();
 
-        console.log({ res });
-
-        if (!res) {
-          throw new Error("Failed to set up user");
+          if (!res) {
+            throw new Error("Failed to set up user");
+          }
         }
       } catch (error) {
         console.error("Error setting up user:", error);

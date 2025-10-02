@@ -10,9 +10,7 @@ export const getUserFromCtx = async (ctx: QueryCtx) => {
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_privyId", (q) =>
-        q.eq("privyId", userIdentity.tokenIdentifier)
-      )
+      .withIndex("by_privyId", (q) => q.eq("privyId", userIdentity.subject))
       .first();
 
     return user;

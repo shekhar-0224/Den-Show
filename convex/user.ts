@@ -39,8 +39,6 @@ export const setupUser = action({
     try {
       const userIdentity = await ctx.auth.getUserIdentity();
 
-      console.log({ dsfsdfdsgs: userIdentity });
-
       if (!userIdentity || typeof userIdentity.subject !== "string") {
         return false;
       }
