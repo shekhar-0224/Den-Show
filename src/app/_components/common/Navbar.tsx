@@ -34,8 +34,9 @@ const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
           <Image src="/images/den-logo.png" alt="Den" width={83} height={28} />
         </Link>
         <GlobalSearch />
-        <div className="hidden md:flex items-center gap-4">
-          {/* <Link href="/explore" className="hover:underline">
+        <div className="hidden md:flex items-center gap-8">
+          {/* Explore Link - Always visible */}
+          <Link href="/explore" className="hover:underline">
             <div className="flex items-center gap-1.5">
               <div className="text-lg font-cream-medium tracking-tighter">
                 Explore
@@ -47,17 +48,34 @@ const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
                 height={16}
               />
             </div>
-          </Link> */}
+          </Link>
+          
+          {/* Clips Link - Always visible */}
+          <Link href="/clips" className="hover:underline">
+            <div className="flex items-center gap-1.5">
+              <div className="text-lg font-cream-medium tracking-tighter">
+                Clips
+              </div>
+              <Image
+                src="/icons/scissors.svg"
+                alt="Clips"
+                width={17}
+                height={16}
+              />
+            </div>
+          </Link>
+          
+          {/* Den Studio Link - Only visible when authenticated */}
           {isAuthenticated &&
             (isChannelOwner ? (
               <Link href="/my-den" className="hover:underline">
                 <div className="flex items-center gap-1.5">
                   <div className="text-lg font-cream-medium tracking-tighter">
-                    My Den
+                    Den Studio
                   </div>
                   <Image
                     src="/icons/den.svg"
-                    alt="Den"
+                    alt="Den Studio"
                     width={17}
                     height={16}
                     className="mr-0.5"

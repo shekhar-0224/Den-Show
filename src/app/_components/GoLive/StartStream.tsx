@@ -15,7 +15,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { uploadFile } from "~/lib/utils";
-import { api } from "~/trpc/react";
+// import { api } from "~/trpc/react";
 
 interface StartStreamProps {
   onStartStream: () => void;
@@ -115,18 +115,17 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     setShowTimePicker(false);
   };
 
-  const { mutateAsync: startStream } = api.stream.startInstant.useMutation({
-    onSuccess: (data) => {
-      setIsStartingStream(false);
-      toast.success("Stream started successfully");
-      onStartStream();
-      router.push(`/live/${data.streamId}/dashboard`);
-    },
-    onError: () => {
-      setIsStartingStream(false);
-      toast.error("Failed to start stream");
-    },
-  });
+  // Dummy function for starting stream
+  const startStream = async (data: any) => {
+    console.log("Dummy startStream called with:", data);
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    setIsStartingStream(false);
+    toast.success("Stream started successfully");
+    onStartStream();
+    router.push(`/live/dummy-stream-id/dashboard`);
+  };
 
   const [isStartingStream, setIsStartingStream] = useState(false);
 

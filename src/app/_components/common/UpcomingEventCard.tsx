@@ -127,7 +127,7 @@ const UpcomingEventCard = ({
             {/* Notification icon instead of play button */}
             <button
               onClick={goToEvent}
-              className="w-7 h-7 flex items-center justify-center hover:scale-105 transition-transform"
+              className="w-7 h-7 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
             >
               <Image
                 src="/icons/notif.svg"

@@ -18,7 +18,7 @@ import {
 } from "~/components/ui/dialog";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatDate } from "~/lib/utils";
-import { api } from "~/trpc/react";
+// import { api } from "~/trpc/react";
 import Onboarding from "../../MyDen/Onboarding";
 
 const ProfileDetails = () => {
@@ -31,11 +31,28 @@ const ProfileDetails = () => {
 
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
-  const { data: profileDetails, isLoading } =
-    api.profile.getProfileDetails.useQuery();
+  // Dummy data for profile details
+  const profileDetails = {
+    id: "profile1",
+    name: "John Doe",
+    handle: "johndoe",
+    profileUrl: "/images/default-pfp.png",
+    bio: "Content creator and developer",
+    followers: 1234,
+    following: 567,
+    isVerified: true,
+    socialLinks: {
+      twitter: "https://twitter.com/johndoe",
+      farcaster: "https://warpcast.com/johndoe"
+    }
+  };
+  const isLoading = false;
 
-  const { mutate: linkSocialAccount } =
-    api.user.linkSocialAccount.useMutation();
+  // Dummy function for linking social account
+  const linkSocialAccount = (data: any) => {
+    console.log("Dummy linkSocialAccount called with:", data);
+    toast.success("Social account linked successfully!");
+  };
 
   const { linkTwitter, linkFarcaster, linkEmail } = useLinkAccount({
     onSuccess: ({ user, linkMethod, linkedAccount }) => {

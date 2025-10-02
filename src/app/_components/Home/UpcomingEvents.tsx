@@ -2,11 +2,52 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { api } from "~/trpc/react";
 import UpcomingEventCard, { UpcomingEventCardSkeleton } from "../common/UpcomingEventCard";
 
 const UpcomingEvents = () => {
-  const { data: streams, isLoading } = api.stream.getLiveStreams.useQuery();
+  // Dummy data for upcoming events
+  const streams = [
+    {
+      streamId: "upcoming1",
+      details: {
+        title: "Tech Talk: Future of AI",
+        channel: {
+          name: "AIExpert",
+          handle: "aiexpert",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 234
+    },
+    {
+      streamId: "upcoming2",
+      details: {
+        title: "Art Workshop Live",
+        channel: {
+          name: "ArtMaster",
+          handle: "artmaster",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 456
+    },
+    {
+      streamId: "upcoming3",
+      details: {
+        title: "Music Production Tips",
+        channel: {
+          name: "MusicPro",
+          handle: "musicpro",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 789
+    }
+  ];
+  const isLoading = false;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

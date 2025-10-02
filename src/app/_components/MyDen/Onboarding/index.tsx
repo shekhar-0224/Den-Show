@@ -25,7 +25,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn, uploadFile } from "~/lib/utils";
-import { api } from "~/trpc/react";
+// import { api } from "~/trpc/react";
 import FanPassModalContent from "../../common/FanPass/FanPassModalContent";
 import TokenSearch from "./TokenSearch";
 
@@ -70,18 +70,10 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
 
   const [debouncedHandle] = useDebounceValue(formData.channelHandle, 500);
 
-  const {
-    data: isHandleAvailable,
-    isLoading: isLoadingHandleAvailable,
-    isFetched: isFetchedHandleAvailable,
-  } = api.channel.checkIfHandleIsAvailable.useQuery(
-    {
-      handle: debouncedHandle.toLowerCase(),
-    },
-    {
-      enabled: debouncedHandle.length > 0,
-    },
-  );
+  // Dummy data for handle availability
+  const isHandleAvailable = debouncedHandle.length > 0 ? !RESERVED_HANDLES.includes(debouncedHandle.toLowerCase()) : true;
+  const isLoadingHandleAvailable = false;
+  const isFetchedHandleAvailable = true;
 
   const handleCreateDen = async () => {
     if (!isFormValid) return;

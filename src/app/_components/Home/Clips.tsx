@@ -2,11 +2,52 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { api } from "~/trpc/react";
 import ClipCard, { ClipCardSkeleton } from "../common/ClipCard";
 
 const Clips = () => {
-  const { data: streams, isLoading } = api.stream.getLiveStreams.useQuery();
+  // Dummy data for clips
+  const streams = [
+    {
+      streamId: "clip1",
+      details: {
+        title: "Best React Hooks Explained",
+        channel: {
+          name: "ReactDev",
+          handle: "reactdev",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 1234
+    },
+    {
+      streamId: "clip2",
+      details: {
+        title: "Quick Cooking Tips",
+        channel: {
+          name: "QuickChef",
+          handle: "quickchef",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 567
+    },
+    {
+      streamId: "clip3",
+      details: {
+        title: "Gaming Highlights",
+        channel: {
+          name: "GameHighlights",
+          handle: "gamehighlights",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 890
+    }
+  ];
+  const isLoading = false;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

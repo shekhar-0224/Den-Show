@@ -2,11 +2,52 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { api } from "~/trpc/react";
 import StreamCard, { StreamCardSkeleton } from "../common/StreamCard";
 
 const PastStreams = () => {
-  const { data: streams, isLoading } = api.stream.getPastStreams.useQuery();
+  // Dummy data for past streams
+  const streams = [
+    {
+      streamId: "past1",
+      details: {
+        title: "React Tutorial Complete",
+        channel: {
+          name: "CodeMaster",
+          handle: "codemaster",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 2345
+    },
+    {
+      streamId: "past2",
+      details: {
+        title: "Cooking Masterclass",
+        channel: {
+          name: "ChefPro",
+          handle: "chefpro",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 1234
+    },
+    {
+      streamId: "past3",
+      details: {
+        title: "Gaming Tournament Finals",
+        channel: {
+          name: "GameChamp",
+          handle: "gamechamp",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 5678
+    }
+  ];
+  const isLoading = false;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
