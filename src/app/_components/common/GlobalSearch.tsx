@@ -6,21 +6,30 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { Card } from "~/components/ui/card";
-import { api } from "~/trpc/react";
+// import { api } from "~/trpc/react";
 
 const GlobalSearch = () => {
   const [search, setSearch] = useState("");
   const pathname = usePathname();
   const [debouncedSearch] = useDebounceValue(search, 500);
 
-  const {
-    data: searchResults,
-    isPending,
-    isLoading,
-  } = api.channel.searchChannels.useQuery(
-    { query: debouncedSearch },
-    { enabled: debouncedSearch.length > 0 },
-  );
+  // Dummy data for search results
+  const searchResults = debouncedSearch.length > 0 ? [
+    {
+      id: "search1",
+      name: "TechGuru",
+      handle: "techguru",
+      profileUrl: "/images/default-channel-logo.png"
+    },
+    {
+      id: "search2", 
+      name: "ChefMaster",
+      handle: "chefmaster",
+      profileUrl: "/images/default-channel-logo.png"
+    }
+  ] : [];
+  const isPending = false;
+  const isLoading = false;
 
   //clear search on route change
   useEffect(() => {

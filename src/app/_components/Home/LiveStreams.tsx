@@ -2,11 +2,52 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { api } from "~/trpc/react";
 import StreamCard, { StreamCardSkeleton } from "../common/StreamCard";
 
 const LiveStreams = () => {
-  const { data: streams, isLoading } = api.stream.getLiveStreams.useQuery();
+  // Dummy data for live streams
+  const streams = [
+    {
+      streamId: "stream1",
+      details: {
+        title: "How to Build a React App",
+        channel: {
+          name: "TechGuru",
+          handle: "techguru",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 1234
+    },
+    {
+      streamId: "stream2", 
+      details: {
+        title: "Cooking with Friends",
+        channel: {
+          name: "ChefMaster",
+          handle: "chefmaster",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 567
+    },
+    {
+      streamId: "stream3",
+      details: {
+        title: "Gaming Night Live",
+        channel: {
+          name: "GamePro",
+          handle: "gamepro",
+          profileUrl: "/images/default-channel-logo.png"
+        },
+        thumbnailUrl: "/images/default-thumbnail.png"
+      },
+      views: 890
+    }
+  ];
+  const isLoading = false;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,7 +89,10 @@ const LiveStreams = () => {
       <div className="flex items-center justify-between md:pr-6">
         <div className="flex items-center gap-1">
           <div>
-            <span className="text-[#FF4141] text-lg font-cream-medium tracking-tighter">
+            <span className="text-black font-semibold text-xl font-instrument-sans tracking-tighter">
+              Creators{" "}
+            </span>
+            <span className="text-[#FF4141] text-xl font-cream-medium tracking-tighter">
               Live Now
             </span>
           </div>

@@ -29,7 +29,7 @@ const ChannelCircle = ({
       key={id}
       onClick={() => router.push(`/${handle}`)}
       className={cn(
-        "group relative rounded-full border border-black w-[90px] h-[90px] flex items-center justify-center overflow-hidden cursor-pointer",
+        "group relative rounded-full border border-black w-[118.75px] h-[118.75px] flex items-center justify-center overflow-hidden cursor-pointer",
         isMobile && "w-[60px] h-[60px]",
       )}
     >
@@ -41,13 +41,13 @@ const ChannelCircle = ({
           damping: 12,
           bounce: 0.1,
         }}
-        className={cn("w-[88px] h-[88px]", isMobile && "w-[60px] h-[60px]")}
+        className={cn("w-[120.75px] h-[120.75px]", isMobile && "w-[60px] h-[60px]")}
       >
         <Image
           src={profileUrl ?? "/images/default-channel-logo.png"}
           alt={name ?? ""}
-          width={isMobile ? 61 : 122}
-          height={isMobile ? 61 : 122}
+          width={isMobile ? 61 : 118.75}
+          height={isMobile ? 61 : 118.75}
           className="rounded-full"
         />
       </motion.div>

@@ -1,8 +1,8 @@
 "use client";
 
-import { usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -15,22 +15,15 @@ import StartStream from "../GoLive/StartStream";
 import Onboarding from "../MyDen/Onboarding";
 import GlobalSearch from "./GlobalSearch";
 import LoginButton from "./LoginButton";
-import { TestComp } from "./TestComp";
 
 interface NavbarProps {
   isAuthenticated: boolean;
 }
 
 const Navbar = ({ isAuthenticated }: NavbarProps) => {
-  const { user } = usePrivy();
+  const router = useRouter();
 
-  const isChannelOwner = false;
-
-  const profilePic =
-    user?.linkedAccounts.find((acc) => acc.type === "twitter_oauth")
-      ?.profilePictureUrl ||
-    user?.linkedAccounts.find((acc) => acc.type === "farcaster")?.pfp ||
-    "/images/default-pfp.png";
+  const isChannelOwner = false; // TODO: fetch from user state
 
   const [isStartStreamOpen, setIsStartStreamOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
@@ -42,8 +35,9 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
           <Image src="/images/den-logo.png" alt="Den" width={83} height={28} />
         </Link>
         <GlobalSearch />
-        <div className="hidden md:flex items-center gap-4">
-          {/* <Link href="/explore" className="hover:underline">
+        <div className="hidden md:flex items-center gap-8">
+          {/* Explore Link - Always visible */}
+          <Link href="/explore" className="hover:underline">
             <div className="flex items-center gap-1.5">
               <div className="text-lg font-cream-medium tracking-tighter">
                 Explore
@@ -55,17 +49,34 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
                 height={16}
               />
             </div>
-          </Link> */}
-          {isAuthenticated ? (
-            isChannelOwner ? (
+          </Link>
+
+          {/* Clips Link - Always visible */}
+          <Link href="/clips" className="hover:underline">
+            <div className="flex items-center gap-1.5">
+              <div className="text-lg font-cream-medium tracking-tighter">
+                Clips
+              </div>
+              <Image
+                src="/icons/scissors.svg"
+                alt="Clips"
+                width={17}
+                height={16}
+              />
+            </div>
+          </Link>
+
+          {/* Den Studio Link - Only visible when authenticated */}
+          {isAuthenticated &&
+            (isChannelOwner ? (
               <Link href="/my-den" className="hover:underline">
                 <div className="flex items-center gap-1.5">
                   <div className="text-lg font-cream-medium tracking-tighter">
-                    My Den
+                    Den Studio
                   </div>
                   <Image
                     src="/icons/den.svg"
-                    alt="Den"
+                    alt="Den Studio"
                     width={17}
                     height={16}
                     className="mr-0.5"
@@ -88,7 +99,7 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
                     Start My Den
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="w-[670px] flex flex-col pt-1 shadow-large">
+                <DialogContent className="w-[612px] h-auto flex flex-col pt-1 shadow-large">
                   <DialogTitle className="text-lg font-cream-medium tracking-tighter text-center">
                     {/* Set up your Den */}
                     {}
@@ -98,13 +109,12 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
                   />
                 </DialogContent>
               </Dialog>
-            )
-          ) : null}
+            ))}
         </div>
       </div>
       <div className="flex items-center gap-4">
-        {isAuthenticated ? (
-          isChannelOwner ? (
+        {isAuthenticated &&
+          (isChannelOwner ? (
             <Dialog
               open={isStartStreamOpen}
               onOpenChange={setIsStartStreamOpen}
@@ -121,7 +131,7 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
                   Go Live
                 </Button>
               </DialogTrigger>
-              <DialogContent className="w-[670px] flex flex-col pt-1">
+              <DialogContent className="w-[612px] h-auto flex flex-col pt-1 shadow-large">
                 <DialogTitle className="text-lg font-cream-medium tracking-tighter text-center">
                   {/* Set up your Den */}
                   {}
@@ -145,7 +155,7 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
                   Go Live
                 </Button>
               </DialogTrigger>
-              <DialogContent className="w-[670px] flex flex-col pt-1">
+              <DialogContent className="w-[612px] h-auto flex flex-col pt-1 shadow-large">
                 <DialogTitle className="text-lg font-cream-medium tracking-tighter text-center">
                   {/* Set up your Den */}
                   {}
@@ -155,13 +165,11 @@ const Navbar = ({ isAuthenticated }: NavbarProps) => {
                 />
               </DialogContent>
             </Dialog>
-          )
-        ) : null}
-        <TestComp />
-        {user ? (
+          ))}
+        {isAuthenticated ? (
           <Link href="/profile">
             <Image
-              src={profilePic}
+              src="/images/default-pfp.png"
               alt="Profile"
               width={40}
               height={40}
