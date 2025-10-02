@@ -230,7 +230,7 @@ const ProfileDetails = () => {
                       Start My Den
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="w-[612px] max-h-[678px] flex flex-col pt-1 shadow-large">
+                  <DialogContent className="w-[612px] h-auto flex flex-col pt-1 shadow-large">
                     <DialogTitle className="text-lg font-cream-medium tracking-tighter text-center">
                       {}
                     </DialogTitle>
