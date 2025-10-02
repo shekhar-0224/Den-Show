@@ -179,6 +179,8 @@ export const createStream = mutation({
         }
       );
     }
+
+    return newStreamId;
   },
 });
 
