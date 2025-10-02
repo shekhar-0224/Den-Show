@@ -37,7 +37,7 @@ export const channelDetails = pgTable(
     index("idx_channel_details_handle").on(table.handle),
     index("idx_channel_details_created_at").on(table.createdAt),
     index("idx_channel_details_nsfw").on(table.nsfw),
-  ],
+  ]
 );
 
 export const channelDetailsRelations = relations(channelDetails, ({ one }) => ({

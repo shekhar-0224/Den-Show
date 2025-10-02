@@ -8,7 +8,8 @@ export const env = createEnv({
    */
   server: {
     PRIVY_APP_SECRET: z.string(),
-    DATABASE_URL: z.string().url(),
+    CONVEX_DEPLOYMENT: z.string(),
+    DATABASE_URL: z.url(),
     JWT_SECRET: z.string(),
     LIVEKIT_API_KEY: z.string(),
     LIVEKIT_API_SECRET: z.string(),
@@ -34,6 +35,9 @@ export const env = createEnv({
     NEXT_PUBLIC_PRIVY_APP_ID: z.string(),
     NEXT_PUBLIC_LIVEKIT_URL: z.string(),
     NEXT_PUBLIC_ONCHAINKIT_API_KEY: z.string(),
+    NEXT_PUBLIC_CONVEX_URL: z.url(),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.url(),
   },
 
   /**
@@ -42,6 +46,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     PRIVY_APP_SECRET: process.env.PRIVY_APP_SECRET,
+    CONVEX_DEPLOYMENT: process.env.CONVEX_DEPLOYMENT,
     DATABASE_URL: process.env.DATABASE_URL,
     JWT_SECRET: process.env.JWT_SECRET,
     LIVEKIT_API_KEY: process.env.LIVEKIT_API_KEY,
@@ -58,6 +63,9 @@ export const env = createEnv({
     NEXT_PUBLIC_PRIVY_APP_ID: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
     NEXT_PUBLIC_LIVEKIT_URL: process.env.NEXT_PUBLIC_LIVEKIT_URL,
     NEXT_PUBLIC_ONCHAINKIT_API_KEY: process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY,
+    NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
+    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

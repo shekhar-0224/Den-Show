@@ -1,10 +1,11 @@
 "use client";
 
 import { OnchainKitProvider } from "@coinbase/onchainkit";
-import { PrivyProvider } from "@privy-io/react-auth";
-import { createConfig } from "@privy-io/wagmi";
-import { WagmiProvider } from "@privy-io/wagmi";
+import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
+import { createConfig, WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
+import { useCallback, useMemo } from "react";
 import { base } from "viem/chains";
 import { http } from "wagmi";
 import { env } from "~/env";
@@ -17,7 +18,29 @@ export const config = createConfig({
   },
 });
 
+const useAuthFromPrivy = () => {
+  const { ready, authenticated, getAccessToken } = usePrivy();
+
+  const fetchAccessToken = useCallback(
+    async ({ forceRefreshToken: _ }: { forceRefreshToken: boolean }) => {
+      return await getAccessToken();
+    },
+
+    [getAccessToken]
+  );
+
+  return useMemo(
+    () => ({
+      isLoading: !ready,
+      isAuthenticated: authenticated,
+      fetchAccessToken,
+    }),
+    [ready, authenticated, fetchAccessToken]
+  );
+};
+
 const queryClient = new QueryClient();
+const convex = new ConvexReactClient(env.NEXT_PUBLIC_CONVEX_URL);
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -34,14 +57,16 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           },
         }}
       >
-        <OnchainKitProvider
-          apiKey={env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-          chain={base}
-        >
-          <QueryClientProvider client={queryClient}>
-            <WagmiProvider config={config}>{children}</WagmiProvider>
-          </QueryClientProvider>
-        </OnchainKitProvider>
+        <ConvexProviderWithAuth client={convex} useAuth={useAuthFromPrivy}>
+          <OnchainKitProvider
+            apiKey={env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+            chain={base}
+          >
+            <QueryClientProvider client={queryClient}>
+              <WagmiProvider config={config}>{children}</WagmiProvider>
+            </QueryClientProvider>
+          </OnchainKitProvider>
+        </ConvexProviderWithAuth>
       </PrivyProvider>
     </TRPCReactProvider>
   );

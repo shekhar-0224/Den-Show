@@ -1,5 +1,6 @@
-import { usePrivy, useWallets } from "@privy-io/react-auth";
-import React, { useEffect, useState } from "react";
+import { useWallets } from "@privy-io/react-auth";
+import { useConvexAuth } from "convex/react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -17,11 +18,15 @@ const index = ({
   creatorTokenAddress,
   fanPassAmount = "100", //TODO: Get from backend
 }: SwapWidgetProps) => {
-  const { ready, authenticated } = usePrivy();
+  const { isLoading, isAuthenticated } = useConvexAuth();
+
+  const ready = isLoading;
+  const authenticated = isAuthenticated;
+
   const { wallets } = useWallets();
 
   const embeddedWallet = wallets.find(
-    (wallet) => wallet.walletClientType === "privy",
+    (wallet) => wallet.walletClientType === "privy"
   );
 
   const address = embeddedWallet?.address;
@@ -60,7 +65,7 @@ const index = ({
       {
         enabled: !!address && !!inputAmount && Number(inputAmount) > 0,
         retry: false,
-      },
+      }
     );
 
   // Get quote query for execution (heavy, with transaction data)
@@ -85,7 +90,7 @@ const index = ({
     {
       enabled: false, // Only fetch manually when needed for execution
       retry: false,
-    },
+    }
   );
 
   // Fetch both ETH and token balances
@@ -120,7 +125,7 @@ const index = ({
       }
     };
 
-    fetchBalances();
+    void fetchBalances();
   }, [embeddedWallet, address, creatorTokenAddress]);
 
   // Update output amount when price data changes
@@ -327,7 +332,7 @@ const index = ({
       // Check allowance for selling before proceeding
       if (mode === "sell" && freshQuote.issues?.allowance) {
         const currentAllowance = BigInt(
-          freshQuote.issues.allowance.actual || "0",
+          freshQuote.issues.allowance.actual || "0"
         );
         const requiredAmount = BigInt(freshQuote.sellAmount);
 
@@ -350,7 +355,7 @@ const index = ({
           const requiredEth = Number(requiredWei) / 10 ** 18;
           const currentEth = Number(balanceWei) / 10 ** 18;
           toast.error(
-            `Insufficient funds. Required: ${requiredEth.toFixed(6)} ETH, Current: ${currentEth.toFixed(6)} ETH`,
+            `Insufficient funds. Required: ${requiredEth.toFixed(6)} ETH, Current: ${currentEth.toFixed(6)} ETH`
           );
           return;
         }
@@ -363,7 +368,7 @@ const index = ({
           const requiredTokens = Number(requiredTokenWei) / 10 ** 18;
           const currentTokens = Number(tokenBalanceWei) / 10 ** 18;
           toast.error(
-            `Insufficient ${creatorTokenSymbol} tokens. Required: ${requiredTokens.toFixed(6)}, Current: ${currentTokens.toFixed(6)}`,
+            `Insufficient ${creatorTokenSymbol} tokens. Required: ${requiredTokens.toFixed(6)}, Current: ${currentTokens.toFixed(6)}`
           );
           return;
         }
@@ -378,7 +383,7 @@ const index = ({
           const requiredEth = Number(gasRequiredWei) / 10 ** 18;
           const currentEth = Number(ethBalanceWei) / 10 ** 18;
           toast.error(
-            `Insufficient ETH for gas. Required: ${requiredEth.toFixed(6)} ETH, Current: ${currentEth.toFixed(6)} ETH`,
+            `Insufficient ETH for gas. Required: ${requiredEth.toFixed(6)} ETH, Current: ${currentEth.toFixed(6)} ETH`
           );
           return;
         }
@@ -470,7 +475,7 @@ const index = ({
       const { data: freshQuote } = await refetchQuote();
       if (freshQuote?.issues?.allowance) {
         const currentAllowance = BigInt(
-          freshQuote.issues.allowance.actual || "0",
+          freshQuote.issues.allowance.actual || "0"
         );
         const requiredAmount = BigInt(freshQuote.sellAmount);
         return currentAllowance < requiredAmount;
@@ -561,7 +566,7 @@ const index = ({
         <Button
           className={cn(
             "flex-1 hover:bg-[#C73F3F]",
-            mode === "sell" && "bg-[#C73F3F]",
+            mode === "sell" && "bg-[#C73F3F]"
           )}
           variant={mode === "sell" ? "primary" : "default"}
           onClick={() => handleModeSwitch("sell")}
@@ -616,7 +621,7 @@ const index = ({
           <div
             className={cn(
               "flex-1 text-center shadow-small border-border border p-2 text-[10px] cursor-pointer hover:bg-primary",
-              mode === "buy" && inputAmount === fanPassAmount && "bg-primary",
+              mode === "buy" && inputAmount === fanPassAmount && "bg-primary"
             )}
             onClick={() => setInputAmount(fanPassAmount)}
           >
@@ -625,7 +630,7 @@ const index = ({
           <div
             className={cn(
               "flex-1 text-center shadow-small border-border border p-2 text-[10px] cursor-pointer hover:bg-primary",
-              mode === "buy" && inputAmount === "0.005" && "bg-primary",
+              mode === "buy" && inputAmount === "0.005" && "bg-primary"
             )}
             onClick={() => setInputAmount("0.005")}
           >
@@ -634,7 +639,7 @@ const index = ({
           <div
             className={cn(
               "flex-1 text-center shadow-small border-border border p-2 text-[10px] cursor-pointer hover:bg-primary",
-              mode === "buy" && inputAmount === "0.01" && "bg-primary",
+              mode === "buy" && inputAmount === "0.01" && "bg-primary"
             )}
             onClick={() => setInputAmount("0.01")}
           >
@@ -643,7 +648,7 @@ const index = ({
           <div
             className={cn(
               "flex-1 text-center shadow-small border-border border p-2 text-[10px] cursor-pointer hover:bg-primary",
-              mode === "buy" && inputAmount === "0.1" && "bg-primary",
+              mode === "buy" && inputAmount === "0.1" && "bg-primary"
             )}
             onClick={() => setInputAmount("0.1")}
           >
@@ -657,7 +662,7 @@ const index = ({
           <div
             className={cn(
               "flex-1 text-center shadow-small border-border border p-2 text-[10px] cursor-pointer hover:bg-primary",
-              mode === "sell" && inputAmount === "100" && "bg-primary",
+              mode === "sell" && inputAmount === "100" && "bg-primary"
             )}
             onClick={() => setInputAmount("100")}
           >
@@ -666,7 +671,7 @@ const index = ({
           <div
             className={cn(
               "flex-1 text-center shadow-small border-border border p-2 text-[10px] cursor-pointer hover:bg-primary",
-              mode === "sell" && inputAmount === "1000" && "bg-primary",
+              mode === "sell" && inputAmount === "1000" && "bg-primary"
             )}
             onClick={() => setInputAmount("1000")}
           >
@@ -675,7 +680,7 @@ const index = ({
           <div
             className={cn(
               "flex-1 text-center shadow-small border-border border p-2 text-[10px] cursor-pointer hover:bg-primary",
-              mode === "sell" && inputAmount === "10000" && "bg-primary",
+              mode === "sell" && inputAmount === "10000" && "bg-primary"
             )}
             onClick={() => setInputAmount("10000")}
           >

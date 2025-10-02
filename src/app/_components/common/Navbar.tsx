@@ -18,11 +18,12 @@ import LoginButton from "./LoginButton";
 
 interface NavbarProps {
   isAuthenticated: boolean;
-  isChannelOwner: boolean;
 }
 
-const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
+const Navbar = ({ isAuthenticated }: NavbarProps) => {
   const router = useRouter();
+
+  const isChannelOwner = false; // TODO: fetch from user state
 
   const [isStartStreamOpen, setIsStartStreamOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
@@ -49,7 +50,7 @@ const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
               />
             </div>
           </Link>
-          
+
           {/* Clips Link - Always visible */}
           <Link href="/clips" className="hover:underline">
             <div className="flex items-center gap-1.5">
@@ -64,7 +65,7 @@ const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
               />
             </div>
           </Link>
-          
+
           {/* Den Studio Link - Only visible when authenticated */}
           {isAuthenticated &&
             (isChannelOwner ? (
@@ -166,17 +167,15 @@ const Navbar = ({ isAuthenticated, isChannelOwner }: NavbarProps) => {
             </Dialog>
           ))}
         {isAuthenticated ? (
-          <>
-            <Link href="/profile">
-              <Image
-                src="/images/default-pfp.png"
-                alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full border border-border"
-              />
-            </Link>
-          </>
+          <Link href="/profile">
+            <Image
+              src="/images/default-pfp.png"
+              alt="Profile"
+              width={40}
+              height={40}
+              className="rounded-full border border-border"
+            />
+          </Link>
         ) : (
           <LoginButton />
         )}

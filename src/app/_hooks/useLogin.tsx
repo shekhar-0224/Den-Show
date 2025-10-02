@@ -1,72 +1,42 @@
+"use client";
+
 import { usePrivy, useLogin as usePrivyLogin } from "@privy-io/react-auth";
-import { TRPCError } from "@trpc/server";
-import { toast } from "sonner";
-import { loginWithEmail, loginWithSocialAccount } from "../_actions";
+import { useAction } from "convex/react";
+import posthog from "posthog-js";
+import { api } from "../../../convex/_generated/api";
 
 export default function useLogin() {
-  const { logout: privyLogout } = usePrivy();
+  const setupUser = useAction(api.user.setupUser);
+  const { logout } = usePrivy();
+
   const { login: privyLogin } = usePrivyLogin({
-    onComplete: ({ user, loginMethod }) => {
-      if (loginMethod === "email" && user.email && user.wallet) {
-        loginWithEmail({
-          email: user.email.address,
-          address: user.wallet.address,
-        })
-          .then(() => {
-            toast.success("Logged in successfully!");
-          })
-          .catch((err) => {
-            console.error(err);
-            toast.error(
-              err instanceof TRPCError ? err.message : "Something went wrong",
-            );
-            privyLogout();
-          });
-      } else if (
-        loginMethod === "farcaster" &&
-        user.farcaster?.fid &&
-        user.farcaster.username &&
-        user.wallet
-      ) {
-        loginWithSocialAccount({
-          type: "farcaster",
-          id: user.farcaster.fid.toString(),
-          username: user.farcaster.username,
-          address: user.wallet.address,
-        })
-          .then(() => {
-            toast.success("Logged in successfully!");
-          })
-          .catch((err) => {
-            console.error(err);
-            toast.error(
-              err instanceof TRPCError ? err.message : "Something went wrong",
-            );
-            privyLogout();
-          });
-      } else if (
-        loginMethod === "twitter" &&
-        user.twitter?.subject &&
-        user.twitter.username &&
-        user.wallet
-      ) {
-        loginWithSocialAccount({
-          type: "twitter",
-          id: user.twitter.subject,
-          username: user.twitter.username,
-          address: user.wallet.address,
-        })
-          .then(() => {
-            toast.success("Logged in successfully!");
-          })
-          .catch((err) => {
-            console.error(err);
-            toast.error(
-              err instanceof TRPCError ? err.message : "Something went wrong",
-            );
-            privyLogout();
-          });
+    onComplete: async ({ user, isNewUser, loginMethod, loginAccount }) => {
+      console.log("-------------------------------------");
+      console.log({ user, isNewUser });
+      console.log("-------------------------------------");
+
+      try {
+        if (isNewUser)
+          posthog.capture("sign-up", { loginMethod, loginAccount });
+        else posthog.capture("login", { loginMethod, ...loginAccount });
+
+        const res = await setupUser();
+
+        console.log({ res });
+
+        if (!res) {
+          throw new Error("Failed to set up user");
+        }
+      } catch (error) {
+        console.error("Error setting up user:", error);
+        void logout();
       }
+    },
+
+    onError: (error) => {
+      console.error("Login error:", error);
+      alert("Login error: ");
+      posthog.capture("login-error", { error });
     },
   });
 
