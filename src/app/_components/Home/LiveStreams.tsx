@@ -1,53 +1,20 @@
 "use client";
 
+import { type Preloaded, usePreloadedQuery } from "convex/react";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import StreamCard, { StreamCardSkeleton } from "../common/StreamCard";
+import type { api } from "../../../../convex/_generated/api";
+import StreamCard from "../common/StreamCard";
 
-const LiveStreams = () => {
-  // Dummy data for live streams
-  const streams = [
-    {
-      streamId: "stream1",
-      details: {
-        title: "How to Build a React App",
-        channel: {
-          name: "TechGuru",
-          handle: "techguru",
-          profileUrl: "/images/default-channel-logo.png"
-        },
-        thumbnailUrl: "/images/default-thumbnail.png"
-      },
-      views: 1234
-    },
-    {
-      streamId: "stream2", 
-      details: {
-        title: "Cooking with Friends",
-        channel: {
-          name: "ChefMaster",
-          handle: "chefmaster",
-          profileUrl: "/images/default-channel-logo.png"
-        },
-        thumbnailUrl: "/images/default-thumbnail.png"
-      },
-      views: 567
-    },
-    {
-      streamId: "stream3",
-      details: {
-        title: "Gaming Night Live",
-        channel: {
-          name: "GamePro",
-          handle: "gamepro",
-          profileUrl: "/images/default-channel-logo.png"
-        },
-        thumbnailUrl: "/images/default-thumbnail.png"
-      },
-      views: 890
-    }
-  ];
-  const isLoading = false;
+const LiveStreams = ({
+  preloadedGetCurrentLiveStreams,
+}: {
+  preloadedGetCurrentLiveStreams: Preloaded<
+    typeof api.stream.getCurrentLiveStreams
+  >;
+}) => {
+  const livestreams = usePreloadedQuery(preloadedGetCurrentLiveStreams);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,7 +49,7 @@ const LiveStreams = () => {
       scrollContainer.removeEventListener("mouseleave", handleMouseLeave);
       scrollContainer.removeEventListener("wheel", handleWheel);
     };
-  }, [streams]);
+  }, []);
 
   return (
     <div className="px-4 md:px-0 md:pl-6">
@@ -110,13 +77,7 @@ const LiveStreams = () => {
           />
         </div>
       </div>
-      {isLoading ? (
-        <div className="w-full flex mt-2">
-          {Array.from({ length: 4 }, (_, index) => (
-            <StreamCardSkeleton key={index} />
-          ))}
-        </div>
-      ) : streams && streams.length > 0 ? (
+      {livestreams.length > 0 ? (
         <div
           ref={scrollContainerRef}
           className="w-full flex overflow-x-scroll overflow-y-visible mt-2"
@@ -124,24 +85,23 @@ const LiveStreams = () => {
             scrollbarWidth: "none",
           }}
         >
-          {streams.map((stream) => (
+          {livestreams.map((data) => (
             <StreamCard
-              key={stream.streamId}
-              streamId={stream.streamId}
-              title={stream.details.title}
-              username={stream.details.channel.name}
-              handle={stream.details.channel.handle}
+              key={data.stream._id}
+              streamId={data.stream._id}
+              title={data.stream.title}
+              username={data.channel.name}
+              handle={data.channel.handle}
               thumbnail={
-                stream.details.thumbnailUrl ?? "/images/default-thumbnail.png"
+                data.stream.thumbnailPicUrl ?? "/images/default-thumbnail.png"
               }
               creatorPfp={
-                stream.details.channel.profileUrl ??
-                "/images/default-channel-logo.png"
+                data.channel.profilePicUrl ?? "/images/default-channel-logo.png"
               }
               className="mr-4 mb-4"
               isLive
-              views={stream.views}
-              hlsUrl={`https://cdn.den.show/${stream.streamId}.m3u8`}
+              views={0} // TODO: integrate with real view count
+              hlsUrl={`https://cdn.den.show/${data.stream._id}.m3u8`}
             />
           ))}
         </div>

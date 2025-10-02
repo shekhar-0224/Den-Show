@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import { action, internalMutation, query } from "./_generated/server";
+import { env } from "./utils/env";
 import { getUserFromCtx } from "./utils/users";
 import { linkedAccountsSchema } from "./validators";
 
@@ -54,9 +55,9 @@ export const setupUser = action({
         {
           method: "GET",
           headers: {
-            Authorization: `Basic ${btoa(`${process.env.PRIVY_APP_ID}:${process.env.PRIVY_APP_SECRET}`)}`,
+            Authorization: `Basic ${btoa(`${env.PRIVY_APP_ID}:${env.PRIVY_APP_SECRET}`)}`,
             "Content-Type": "application/json",
-            "privy-app-id": process.env.PRIVY_APP_ID ?? "",
+            "privy-app-id": env.PRIVY_APP_ID,
           },
         }
       )
