@@ -48,10 +48,10 @@ const TrendingChannels = () => {
     <div className="px-4 md:px-0 md:pl-6 mt-10">
       <div className="flex items-center justify-between md:pr-6">
         <div className="flex items-center gap-1">
-        <span className="text-black font-semibold text-lg font-chromate tracking-tighter">
+        <span className="text-black font-semibold text-xl font-chromate tracking-tighter">
               Channels{" "}
             </span>
-          <span className="text-lg font-semibold">Trending Now</span>
+          <span className="text-xl font-semibold">Trending Now</span>
           <Image
             src="/icons/trending.svg"
             alt="Trending"

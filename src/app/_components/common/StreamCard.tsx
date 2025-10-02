@@ -67,6 +67,7 @@ const StreamCard = ({
     };
   }, []);
 
+
   const liveBadge = (
     <div className="bg-[#FF4141] text-white text-xs px-1.5 py-0.5 rounded font-semibold flex items-center gap-1">
       <div className="w-2 h-2 bg-white rounded-full" />
@@ -86,10 +87,15 @@ const StreamCard = ({
     </div>
   );
 
-  const badgesContainer = (
-    <div className="absolute top-1.5 right-1.5 flex items-center gap-1 z-20">
-      {liveBadge}
-      {viewsBadge}
+  const boostBadge = (
+    <div className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-semibold flex items-center gap-1">
+      <Image
+        src="/icons/boost.svg"
+        alt="Boost"
+        width={8}
+        height={11}
+      />
+      <span className="font-instrument-sans font-semibold">100x</span>
     </div>
   );
 
@@ -103,26 +109,26 @@ const StreamCard = ({
   return (
     <Card
       className={cn(
-        "p-2.5 w-[355px] gap-4 flex-shrink-0 justify-between",
+        "p-1.5 w-[240px] h-[220px] gap-2 flex-shrink-0 justify-between transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none border",
         className,
       )}
     >
       <CardHeader className="p-0 relative">
         <div
-          className="relative w-[330px] h-[200px] overflow-hidden rounded-none mx-auto"
+          className="relative w-[220px] h-[130px] overflow-hidden mx-auto"
           onMouseEnter={hlsUrl && !didntStart ? onEnter : undefined}
           onMouseLeave={hlsUrl && !didntStart ? onLeave : undefined}
         >
           <Image
             src={thumbnail}
             alt="Thumbnail"
-            width={330}
-            height={200}
+            width={220}
+            height={130}
             className={cn(
               "object-cover transition-opacity duration-150",
               showPreview ? "opacity-0" : "opacity-100",
             )}
-            style={{ width: 330, height: 200 }}
+            style={{ width: 220, height: 130 }}
             priority={false}
           />
 
@@ -135,10 +141,23 @@ const StreamCard = ({
             </div>
           ) : null}
 
-          {isLive ? badgesContainer : !clipId && !didntStart ? viewsBadge : null}
+          {/* Badges Container */}
+          <div className="absolute top-1.5 left-1.5 right-1.5 flex justify-between items-center z-20">
+            {/* Left side - LIVE badge */}
+            <div>
+              {isLive && liveBadge}
+            </div>
+            
+            {/* Right side - Views and Boost badges */}
+            <div className="flex items-center gap-1">
+              {!clipId && !didntStart && viewsBadge}
+              {isLive && boostBadge}
+            </div>
+          </div>
+
         </div>
 
-        <CardTitle className="font-semibold text-sm mt-1 line-clamp-2">
+        <CardTitle className="font-semibold text-sm mt-1 ml-1 line-clamp-2">
           {title}
         </CardTitle>
       </CardHeader>
@@ -146,32 +165,32 @@ const StreamCard = ({
       <CardContent className="p-0">
         <div className="flex justify-between items-center">
           <Link href={`/${handle}`}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Image
                 src={creatorPfp}
                 alt="Creator"
-                width={30}
-                height={30}
+                width={20}
+                height={20}
                 className="rounded-full"
               />
               <div className="flex flex-col flex-1">
-                <div className="text-sm underline">@{handle}</div>
-                <div className="font-medium text-xs flex items-center gap-1 mt-1">
-                  <div className="">Fans: 123</div>
-                  <div className="border-l border-dashed border-black pl-1">
-                    MCap: $123
-                  </div>
-                </div>
+                <div className="text-xs underline font-cream-regular">@{handle}</div>
               </div>
             </div>
           </Link>
-          <Button
+          <button
             disabled={didntStart}
             onClick={goWatch}
-            className="py-1 px-3 text-sm w-[127px]"
+            className="w-7 h-7 bg-black rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform cursor-pointer"
           >
-            {didntStart ? "Didn't Start" : isLive ? "Enter Den" : "Watch"}
-          </Button>
+            <Image
+              src="/icons/play.svg"
+              alt="Play"
+              width={9}
+              height={9}
+              className="ml-0.5"
+            />
+          </button>
         </div>
       </CardContent>
     </Card>
@@ -182,21 +201,21 @@ export default StreamCard;
 
 export const StreamCardSkeleton = () => {
   return (
-    <div className="p-2.5 w-[298px] gap-4 flex-shrink-0 justify-between mr-4 mb-4 border border-black rounded-md">
+    <div className="p-1.5 w-[240px] h-[220px] gap-2 flex-shrink-0 justify-between mr-4 mb-4 border border-black rounded-md">
       <div className="p-0 relative">
-        <Skeleton className="w-[270px] h-[152px]" />
-        <Skeleton className="w-[100px] h-[20px] rounded-base mt-2" />
+        <Skeleton className="w-[220px] h-[130px]" />
+        <Skeleton className="w-[60px] h-[12px] rounded-base mt-1" />
       </div>
-      <div className="p-0 mt-2">
+      <div className="p-0 mt-1">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Skeleton className="w-[30px] h-[30px] rounded-full" />
+          <div className="flex items-center gap-1">
+            <Skeleton className="w-[20px] h-[20px] rounded-full" />
             <div className="flex flex-col flex-1">
-              <Skeleton className="w-[100px] h-[20px] rounded-base" />
-              <Skeleton className="w-[100px] h-[20px] rounded-base mt-2" />
+              <Skeleton className="w-[60px] h-[12px] rounded-base" />
+              <Skeleton className="w-[60px] h-[10px] rounded-base mt-0.5" />
             </div>
           </div>
-          <Skeleton className="w-[100px] h-[30px] rounded-base" />
+          <Skeleton className="w-[28px] h-[28px] rounded-full" />
         </div>
       </div>
     </div>

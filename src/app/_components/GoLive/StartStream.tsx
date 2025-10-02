@@ -277,11 +277,11 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-18">
         <div className="flex flex-col gap-2">
           <label className="uppercase text-xs" htmlFor="channel-name">
             Audience
           </label>
+          <div className="flex items-center gap-[30px] sm:gap-8 md:gap-10 lg:gap-[70px]">
             <div className="flex items-center space-x-3">
               <Switch
                 id="fans-only"
@@ -296,28 +296,8 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
               <Label htmlFor="fans-only" className="font-normal text-sm">
                 Open to <span className="font-semibold">FANS</span> only
               </Label>
-          </div>
-        </div>
+            </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <label className="uppercase text-xs" htmlFor="channel-name">
-              Clipping
-            </label>
-            <Tooltip>
-              <TooltipTrigger>
-                <Image
-                  src="/icons/info.svg"
-                  alt="Info"
-                  width={16}
-                  height={16}
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Only fans will be allowed to clip your content</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
             <div className="flex items-center space-x-3">
               <Switch
                 id="clipping-allowed"
@@ -330,7 +310,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
                 }
               />
               <Label htmlFor="clipping-allowed" className="font-normal text-sm">
-                Allow <span className="font-semibold">CLIPPING</span>
+                This stream is for <span className="font-semibold">18+ audience only</span>
               </Label>
             </div>
           </div>
@@ -399,7 +379,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
                   />
                   
                   {showDatePicker && (
-                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-large z-50 w-64 p-4">
+                    <div className="absolute bottom-full left-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-large z-50 w-64 p-4">
                       <div className="flex items-center justify-between mb-4">
                         <button
                           onClick={() => navigateMonth('prev')}
@@ -471,8 +451,8 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
                       // Parse the time and update selectedTime
                       const timeMatch = value.match(/^(\d{1,2}):(\d{2})$/);
                       if (timeMatch) {
-                        const hour = parseInt(timeMatch[1]);
-                        const minute = parseInt(timeMatch[2]);
+                        const hour = parseInt(timeMatch[1]!);
+                        const minute = parseInt(timeMatch[2]!);
                         if (hour >= 1 && hour <= 12 && minute >= 0 && minute <= 59) {
                           setSelectedTime({
                             hour: hour,
@@ -554,7 +534,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
                 </Button>
               </div>
             </div>
-        </div>
+          </div>
         )}
       </form>
         </>
@@ -642,7 +622,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
                   Edit
                 </Button>
                 <Button
-                  onClick={startLivestreamHandler}
+                  onClick={() => startLivestreamHandler()}
                   className="bg-white border-2 border-black text-black hover:bg-gray-100 px-6 py-2 shadow-[0_4px_0_0_rgba(0,0,0,1)]"
                 >
                   Go Live
