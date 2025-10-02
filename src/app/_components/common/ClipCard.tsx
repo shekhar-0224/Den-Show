@@ -137,22 +137,26 @@ const ClipCard = ({
         </div>
       </CardHeader>
 
-      <CardContent className="p-0">
-        <div className="flex justify-between items-center p-2">
-          <Link href={`/${handle}`}>
+      <CardContent className="p-0 relative">
+        <div className="flex items-center p-2 relative">
+          <Link href={`/${handle}`} className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
               <Image
                 src={creatorPfp}
                 alt="Creator"
                 width={16}
                 height={16}
-                className="rounded-full"
+                className="rounded-full flex-shrink-0"
               />
-              <div className="text-xs font-cream-regular">@{handle}</div>
+              <div className="text-xs font-cream-regular truncate">@{handle}</div>
             </div>
           </Link>
           
-          <div className="flex items-center gap-1">
+          {/* Fade overlay to hide creator name behind buttons */}
+          <div className="absolute right-16 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10"></div>
+          
+          {/* Buttons positioned absolutely */}
+          <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex items-center gap-1 z-20">
             {/* Square button */}
             <button
               onClick={goWatch}
