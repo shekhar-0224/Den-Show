@@ -72,4 +72,10 @@ export default defineSchema({
     .index("by_channelId", ["channelId"])
     .index("by_userId", ["userId"])
     .index("by_state_lastUpdatedAt", ["state", "lastUpdatedAt"]),
+
+  streamViewEvents: defineTable({
+    streamId: v.id("streams"),
+    viewerId: v.id("users"),
+    channelId: v.id("channels"),
+  }),
 });

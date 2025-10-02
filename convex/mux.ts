@@ -51,7 +51,7 @@ export const handleWebhook = internalAction({
     headers: v.record(v.string(), v.string()),
     body: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const event = mux.webhooks.unwrap(args.body, args.headers);
 
     console.log("Mux Webhook Event:", event);
