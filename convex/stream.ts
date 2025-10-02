@@ -52,7 +52,10 @@ export const createStream = mutation({
       scheduledStartTime: args.scheduledStartTime,
     });
 
-    if (!args.scheduledStartTime) {
+    if (
+      !args.scheduledStartTime ||
+      args.scheduledStartTime - Date.now() < 5 * 60 * 1000
+    ) {
       await ctx.scheduler.runAfter(0, internal.mux.changeLiveStreamState, {
         muxStreamId: creds.streamId,
         state: "enable",
