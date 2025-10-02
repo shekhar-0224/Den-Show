@@ -1,19 +1,17 @@
 import { Label } from "@radix-ui/react-label";
+import { useMutation as useCvxMutation } from "convex/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
-import { createChannel } from "~/app/_actions";
 import { useCreateChannelAtom } from "~/app/_atoms/createChannel.atom";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
@@ -24,8 +22,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { cn, uploadFile } from "~/lib/utils";
-// import { api } from "~/trpc/react";
+import { cn } from "~/lib/utils";
+import { api } from "../../../../../convex/_generated/api";
+import type { Id } from "../../../../../convex/_generated/dataModel";
+import { useFileUpload } from "../../../_hooks/useFileUpload";
+
 import FanPassModalContent from "../../common/FanPass/FanPassModalContent";
 import TokenSearch from "./TokenSearch";
 
@@ -37,6 +38,10 @@ interface OnboardingProps {
 
 const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
   const [step, setStep] = useState<"details" | "tier">("details");
+
+  const { mutateAsync } = useFileUpload();
+
+  const createChannel = useCvxMutation(api.channel.createChannel);
 
   const router = useRouter();
 
@@ -71,7 +76,10 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
   const [debouncedHandle] = useDebounceValue(formData.channelHandle, 500);
 
   // Dummy data for handle availability
-  const isHandleAvailable = debouncedHandle.length > 0 ? !RESERVED_HANDLES.includes(debouncedHandle.toLowerCase()) : true;
+  const isHandleAvailable =
+    debouncedHandle.length > 0
+      ? !RESERVED_HANDLES.includes(debouncedHandle.toLowerCase())
+      : true;
   const isLoadingHandleAvailable = false;
   const isFetchedHandleAvailable = true;
 
@@ -81,23 +89,32 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
     try {
       setIsCreatingChannel(true);
 
-      let bannerUrl: string | undefined = undefined;
-      let profileUrl: string | undefined = undefined;
+      let bannerPicId: Id<"_storage"> | undefined;
+      let profilePicId: Id<"_storage"> | undefined;
 
       if (formData.banner) {
-        bannerUrl = await uploadFile(formData.banner);
+        bannerPicId = await mutateAsync(formData.banner);
       }
 
       if (formData.pfp) {
-        profileUrl = await uploadFile(formData.pfp);
+        profilePicId = await mutateAsync(formData.pfp);
       }
 
-      console.log(formData);
-
       await createChannel({
-        ...formData,
-        bannerUrl,
-        profileUrl,
+        name: formData.channelName,
+        handle: formData.channelHandle,
+        bio: formData.channelAbout,
+        nsfw: formData.nsfw,
+        fanPassValue: formData.fanSubscriptionFee,
+        bannerPicId,
+        profilePicId,
+        language: formData.language,
+        // TODO: hande this logix
+        token: {
+          address: formData.token.address ?? "TODO",
+          symbol: formData.token.symbol,
+          source: formData.token.isClanker ? "clanker" : "zora",
+        },
       });
 
       toast.success("Channel created successfully");
@@ -118,7 +135,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
           <div
             className={cn(
               "cursor-pointer w-full relative h-[160px]",
-              !formData.banner && "bg-primary",
+              !formData.banner && "bg-primary"
             )}
             onClick={() => document.getElementById("cover-input")?.click()}
           >
@@ -339,7 +356,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
               </div>
               <div className="text-xs text-gray-700">
                 {RESERVED_HANDLES.includes(
-                  formData.channelHandle.toLowerCase(),
+                  formData.channelHandle.toLowerCase()
                 ) ? (
                   <span className="text-red-500">Invalid handle</span>
                 ) : isLoadingHandleAvailable ? (
