@@ -56,24 +56,22 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
 
-  const categories = [
-    "Gaming",
-    "Entertainment", 
-    "Education",
-    "Technology"
-  ];
+  const categories = ["Gaming", "Entertainment", "Education", "Technology"];
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target as Node)
+      ) {
         setShowCategoryDropdown(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
   const [scheduleData, setScheduleData] = useState({
@@ -163,11 +161,11 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
   };
 
   const handleCategoryToggle = (category: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       categories: prev.categories.includes(category)
-        ? prev.categories.filter(c => c !== category)
-        : [...prev.categories, category]
+        ? prev.categories.filter((c) => c !== category)
+        : [...prev.categories, category],
     }));
   };
 
@@ -199,7 +197,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     setIsStartingStream(false);
     toast.success("Stream started successfully");
     onStartStream();
-    router.push(`/live/${newStreamId}/dashboard`);
+    router.push(`/live/${newStreamId}`);
   };
 
   const isButtonDisabled =
@@ -302,7 +300,11 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
                   id="categories"
                   placeholder="Pick channel category"
                   className="text-sm py-6 pr-10 w-full cursor-pointer shadow-small"
-                  value={formData.categories.length > 0 ? formData.categories.join(", ") : ""}
+                  value={
+                    formData.categories.length > 0
+                      ? formData.categories.join(", ")
+                      : ""
+                  }
                   readOnly
                   onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                 />
@@ -312,11 +314,14 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
                     <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-l-transparent border-r-transparent border-t-black -mt-1"></div>
                   </div>
                 </div>
-                
+
                 {showCategoryDropdown && (
                   <div className="absolute top-full left-0 mt-1 bg-white border border-black shadow-small z-50 w-full">
                     {categories.map((category, index) => (
-                      <div key={category} className="flex items-center justify-between px-3 py-2 border-b border-black last:border-b-0">
+                      <div
+                        key={category}
+                        className="flex items-center justify-between px-3 py-2 border-b border-black last:border-b-0"
+                      >
                         <span className="text-sm text-black">{category}</span>
                         <Checkbox
                           checked={formData.categories.includes(category)}
