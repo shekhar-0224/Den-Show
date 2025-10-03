@@ -55,13 +55,11 @@ const FanPassModalContent = ({
           den.show/{channelHandle}
         </div>
       </div>
-      <div className="w-full flex gap-8">
+      <div className="w-full flex flex-row gap-8">
         {/* Left side - Perks */}
         <div className="flex-1 flex flex-col gap-4">
           <div className="font-medium text-sm">
-            {isCreatingChannel
-              ? `FANs will have to hold ${creatorTokenSymbol} to back you, and unlock exclusive perks:`
-              : `HODL $X worth of tokens, back @${channelHandle}, and unlock these exclusive perks:`}
+            FANs will have to hold DAI to back you, and unlock exclusive perks:
           </div>
           <Card className="w-full p-2.5 text-sm flex flex-col gap-1">
             <div>Earn Revenue Share</div>
@@ -84,7 +82,7 @@ const FanPassModalContent = ({
         </div>
 
         {/* Right side - Price */}
-        <div className="flex flex-col items-end gap-4">
+        <div className="flex-1 flex flex-col items-end gap-4">
           <div className="text-right">
             <div className="text-[#9da3ac] text-sm">Price</div>
             <div className="flex items-baseline gap-2">
