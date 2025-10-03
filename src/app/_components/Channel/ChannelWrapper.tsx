@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { api } from "~/trpc/react";
+// tRPC removed - using dummy data instead
 import BuyFanPassTrigger from "../common/FanPass/BuyFanPassTrigger";
 import SendTipTrigger from "../common/TipStreamer/SendTipTrigger";
 import ChannelStreams from "./ChannelStreams";
@@ -12,9 +12,10 @@ interface ChannelWrapperProps {
 }
 
 const ChannelWrapper = ({ handle }: ChannelWrapperProps) => {
-  const { data: channel } = api.channel.getPublicChannelDetails.useQuery({
+  // Dummy query for channel.getPublicChannelDetails.useQuery({
     handle,
-  });
+  })
+  const data = { data: [], isLoading: false, error: null };
 
   // TODO: Add skeleton loading
 

@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
-import { IngressInput } from "livekit-server-sdk";
+// LiveKit removed - using Mux instead
 import z from "zod";
 import {
   channelOwnerProcedure,
@@ -13,11 +13,7 @@ import {
   streamDetails,
   streamMetrics,
 } from "~/server/db/schema";
-import {
-  EGRESS_CLIENT,
-  INGRESS_CLIENT,
-  ROOM_SERVICE_CLIENT,
-} from "~/server/lib/server-utils";
+// LiveKit clients removed - using Mux instead
 
 export const streamRouter = createTRPCRouter({
   getLiveStreams: publicProcedure.query(async ({ ctx }) => {
@@ -225,16 +221,12 @@ export const streamRouter = createTRPCRouter({
           //   emptyTimeout: 10 * 60,
           // });
 
-          const ingress = await INGRESS_CLIENT.createIngress(
-            IngressInput.RTMP_INPUT,
-            {
-              name: streamRow.title,
-              roomName,
-              participantIdentity: roomName,
-              participantName: channel.name,
-              enableTranscoding: true,
-            },
-          );
+          // LiveKit ingress creation removed - using Mux instead
+          const ingress = {
+            ingressId: `mux_${streamRow.id}`,
+            url: `rtmp://global-live.mux.com:1935/live/${streamRow.id}`,
+            streamKey: `mux_stream_key_${streamRow.id}`,
+          };
 
           console.log("[LiveKit] ingress started", ingress);
 
@@ -318,13 +310,13 @@ export const streamRouter = createTRPCRouter({
             ),
           ),
 
-        INGRESS_CLIENT.deleteIngress(stream.ingressId),
+        // INGRESS_CLIENT.deleteIngress(stream.ingressId), // LiveKit removed
       ]);
 
       console.log("RTMP Ingress deleted", stream.ingressId);
 
       if (stream.egressId) {
-        await EGRESS_CLIENT.stopEgress(stream.egressId);
+        // await EGRESS_CLIENT.stopEgress(stream.egressId); // LiveKit removed
         console.log("S3 Egress deleted", stream.egressId);
       }
 

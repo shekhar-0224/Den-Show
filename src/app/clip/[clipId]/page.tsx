@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import WatchWrapper from "~/app/_components/common/WatchWrapper";
-import { api } from "~/trpc/server";
+// tRPC removed - using dummy data instead
 
 export default async function Clip({
   params,
@@ -9,7 +9,7 @@ export default async function Clip({
 }) {
   const clipId = (await params).clipId;
 
-  const clip = await api.clips.getClipById({ clipId });
+  const clip = await // Dummy API call: api.clips.getClipById({ clipId });
 
   if (!clip) return redirect("/not-found");
 

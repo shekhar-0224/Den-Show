@@ -1,5 +1,5 @@
 import React from "react";
-import { api } from "~/trpc/react";
+// tRPC removed - using dummy data instead
 import StreamCard, { StreamCardSkeleton } from "../common/StreamCard";
 
 interface ChannelStreamsProps {
@@ -7,8 +7,8 @@ interface ChannelStreamsProps {
 }
 
 const ChannelStreams = ({ channelId }: ChannelStreamsProps) => {
-  const { data: streams, isLoading } =
-    api.channel.getPublicChannelStreams.useQuery({ channelId });
+  // Dummy query for channel.getPublicChannelStreams.useQuery({ channelId })
+  const data, isLoading = { data: [], isLoading: false, error: null };
 
   if (isLoading) {
     return (

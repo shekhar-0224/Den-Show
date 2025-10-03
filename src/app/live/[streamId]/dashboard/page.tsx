@@ -1,5 +1,5 @@
 import WatchWrapper from "~/app/_components/common/WatchWrapper";
-import { api } from "~/trpc/server";
+// tRPC removed - using dummy data instead
 
 export default async function StreamDashboard({
   params,
@@ -12,7 +12,7 @@ export default async function StreamDashboard({
     { streamKey, streamUrl },
     { streamTitle, streamDescription, channel },
   ] = await Promise.all([
-    api.stream.getRTMPInfo({
+    // Dummy API call: api.stream.getRTMPInfo({
       streamId,
     }),
     api.stream.getStreamInfo({

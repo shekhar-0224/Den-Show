@@ -6,7 +6,10 @@ import posthog from "posthog-js";
 import { api } from "../../../convex/_generated/api";
 
 export default function useLogin() {
-  const setupUser = useAction(api.user.setupUser);
+  const setupUser = async () => {
+    console.log("Dummy user setup");
+    return { success: true };
+  };
   const { logout } = usePrivy();
 
   const { login: privyLogin } = usePrivyLogin({

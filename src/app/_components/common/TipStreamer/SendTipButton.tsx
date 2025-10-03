@@ -3,11 +3,9 @@ import React, { useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { encodeFunctionData, formatUnits, parseEther } from "viem";
 import { Button } from "~/components/ui/button";
-
-import { useChat } from "@livekit/components-react";
 import { erc20Abi } from "viem";
 import { base } from "viem/chains";
-import { api } from "~/trpc/react";
+// tRPC removed - using dummy data instead
 
 interface SendTipButtonProps {
   amount: number;
@@ -34,19 +32,6 @@ const SendTipButtonRoom = ({
 }: SendTipButtonProps) => {
   const isTipSent = useRef(false);
 
-  const { send } = useChat();
-
-  const handleSend = useCallback(
-    (message: string) => {
-      send(message, {
-        attributes: {
-          label: "tip",
-        },
-      });
-    },
-    [send],
-  );
-
   const { sendTransaction } = useSendTransaction({
     onSuccess: async ({ hash }) => {
       if (isTipSent.current) return;
@@ -64,8 +49,6 @@ const SendTipButtonRoom = ({
 
       isTipSent.current = true;
       toast.success("Tip sent successfully");
-
-      handleSend(`@${username} tipped ${amount} ${tokenSymbol}!`);
     },
     onError: (error) => {
       console.log({ error });
@@ -73,7 +56,11 @@ const SendTipButtonRoom = ({
     },
   });
 
-  const { mutateAsync: sendTipMutation } = api.tip.sendTip.useMutation();
+  // Dummy tip mutation
+  const sendTipMutation = async (data: any) => {
+    console.log("Dummy tip sent:", data);
+    return { success: true };
+  };
 
   const sendTipHandler = async () => {
     console.log("sendTipHandler", amount);
@@ -158,7 +145,11 @@ const SendTipButton = ({
     },
   });
 
-  const { mutateAsync: sendTipMutation } = api.tip.sendTip.useMutation();
+  // Dummy tip mutation
+  const sendTipMutation = async (data: any) => {
+    console.log("Dummy tip sent:", data);
+    return { success: true };
+  };
 
   const sendTipHandler = async () => {
     console.log("sendTipHandler", amount);

@@ -1,9 +1,10 @@
 import React from "react";
 import StreamCard from "~/app/_components/common/StreamCard";
-import { api } from "~/trpc/react";
+// tRPC removed - using dummy data instead
 
 const Clips = () => {
-  const { data: clips, isLoading } = api.clips.getClipsByUser.useQuery();
+  // Dummy query for clips.getClipsByUser.useQuery()
+  const data, isLoading = { data: [], isLoading: false, error: null };
 
   if (isLoading)
     return (

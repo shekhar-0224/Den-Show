@@ -2,17 +2,17 @@ import MuxPlayerComponent from "./MuxPlayer";
 
 interface LiveStreamRendererProps {
   streamId: string;
-  playbackId: string;
+  demoPlaybackId?: string;
 }
 
 const LiveStreamRenderer = ({
   streamId,
-  playbackId,
+  demoPlaybackId,
 }: LiveStreamRendererProps) => {
   return (
     <div className="w-full h-full">
       <MuxPlayerComponent
-        playbackId={playbackId}
+        playbackId={demoPlaybackId || "DS00Spx1CV902MCtPj5WknGlR102V5HFkDe"}
         streamId={streamId}
         title="Demo Live Stream"
         className="w-full h-full rounded-lg"

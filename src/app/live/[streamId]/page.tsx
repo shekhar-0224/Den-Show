@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import WatchWrapper from "~/app/_components/common/WatchWrapper";
-import { api } from "~/trpc/server";
+// tRPC removed - using dummy data instead
 
 export default async function LiveStream({
   params,

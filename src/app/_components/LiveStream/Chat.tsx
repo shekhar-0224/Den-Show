@@ -1,31 +1,39 @@
-import { useChat, useRemoteParticipants } from "@livekit/components-react";
 import { useCallback, useRef, useState } from "react";
 import useAddress from "~/app/_hooks/useAddress";
 import { Input } from "~/components/ui/input";
 
-// interface ChatProps {
-//   isDashboard: boolean;
-//   channelPfp: string | null;
-//   channelHandle: string;
-//   streamId: string;
-//   streamerAddress: string;
-// }
+interface ChatMessage {
+  id: string;
+  message: string;
+  from: string;
+  timestamp: number;
+  isTip?: boolean;
+}
 
 const Chat = () => {
   const { address } = useAddress();
-  const participants = useRemoteParticipants();
-  const { chatMessages, send, isSending } = useChat();
-  const viewerCount = participants.length;
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [isSending, setIsSending] = useState(false);
+  const [viewerCount] = useState(42); // Mock viewer count
 
   const handleSend = useCallback(
     (message: string) => {
-      send(message, {
-        attributes: {
-          label: "chat",
-        },
-      });
+      if (!message.trim()) return;
+      
+      setIsSending(true);
+      
+      // Simulate sending message
+      const newMessage: ChatMessage = {
+        id: Date.now().toString(),
+        message: message.trim(),
+        from: address ? `User_${address.slice(-4)}` : "Anonymous",
+        timestamp: Date.now(),
+      };
+      
+      setChatMessages(prev => [...prev, newMessage]);
+      setIsSending(false);
     },
-    [send],
+    [address],
   );
 
   return (
@@ -38,24 +46,20 @@ const Chat = () => {
       </div>
       <div className="flex-1 flex flex-col gap-2 overflow-y-auto">
         {chatMessages.map((msg) => {
-          if (msg.attributes?.label === "tip") {
+          if (msg.isTip) {
             return (
-              <div key={msg.timestamp} className="text-primary font-bold">
+              <div key={msg.id} className="text-primary font-bold">
                 {msg.message}
               </div>
             );
           }
 
           return (
-            <div key={msg.timestamp}>
-              <span
-                style={{
-                  color: JSON.parse(msg.from?.metadata ?? "{}").color ?? "#000",
-                }}
-              >
-                {msg.from?.identity}:{" "}
+            <div key={msg.id} className="flex gap-2">
+              <span className="font-medium text-blue-600">
+                {msg.from}:
               </span>
-              {msg.message}
+              <span>{msg.message}</span>
             </div>
           );
         })}

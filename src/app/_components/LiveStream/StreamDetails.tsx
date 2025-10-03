@@ -8,22 +8,24 @@ import { useMobile } from "~/app/_hooks/useMobile";
 import { Button } from "~/components/ui/button";
 import BuyFanPassTrigger from "../common/FanPass/BuyFanPassTrigger";
 import SendTipTrigger from "../common/TipStreamer/SendTipTrigger";
-import type { WatchProps } from "../common/WatchWrapper";
+import { useStreamData } from "../common/StreamContext";
 import ChannelDetails from "./ChannelDetails";
 import ClipButton from "./ClipButton";
 import CreatorTokenStats from "./CreatorTokenStats";
 import LiveStreamControls from "./StreamControls";
 
-const StreamDetails = ({
-  streamId,
-  streamTitle,
-  streamDescription,
-  streamUrl,
-  streamKey,
-  isDashboard,
-  channel,
-  type,
-}: WatchProps) => {
+const StreamDetails = () => {
+  const { streamData } = useStreamData();
+  const {
+    streamId,
+    streamTitle,
+    streamDescription,
+    streamUrl,
+    streamKey,
+    isDashboard,
+    channel,
+    type,
+  } = streamData;
   const [isStreamUrlVisible, setIsStreamUrlVisible] = useState(false);
   const [isStreamKeyVisible, setIsStreamKeyVisible] = useState(false);
   const { isMobile } = useMobile();

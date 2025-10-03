@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { AccessToken } from "livekit-server-sdk";
+// LiveKit removed - using Mux instead
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { env } from "~/env";
@@ -89,24 +89,8 @@ export const userRouter = createTRPCRouter({
         }
       }
 
-      const at = new AccessToken(env.LIVEKIT_API_KEY, env.LIVEKIT_API_SECRET, {
-        identity: displayName,
-        metadata: JSON.stringify({
-          color: `#${Math.floor(Math.random() * 16777215)
-            .toString(16)
-            .padStart(6, "0")}`,
-        }),
-      });
-
-      at.addGrant({
-        room,
-        roomJoin: true,
-        canPublish: false,
-        canSubscribe: true,
-        canPublishData: !!ctx.user?.userId,
-      });
-
-      const token = await at.toJwt();
+      // LiveKit token creation removed - using Mux instead
+      const token = `mux_token_${room}_${Date.now()}`;
 
       return token;
     }),

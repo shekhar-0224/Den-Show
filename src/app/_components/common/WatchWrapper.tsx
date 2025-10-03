@@ -3,6 +3,7 @@
 import React from "react";
 import LiveStreamWrapper from "../LiveStream/LiveStreamWrapper";
 import WatchContent from "./WatchContent";
+import { StreamProvider, type StreamData } from "./StreamContext";
 
 export interface WatchProps {
   type: "live" | "vod" | "clip";
@@ -32,11 +33,27 @@ export interface WatchProps {
 }
 
 const WatchWrapper = (props: WatchProps) => {
-  if (props.type === "vod" || props.type === "clip") {
-    return <WatchContent {...props} />;
-  }
+  const streamData: StreamData = {
+    streamId: props.streamId,
+    streamTitle: props.streamTitle,
+    streamDescription: props.streamDescription,
+    streamUrl: props.streamUrl,
+    streamKey: props.streamKey,
+    demoPlaybackId: props.demoPlaybackId,
+    isDashboard: props.isDashboard,
+    type: props.type,
+    channel: props.channel,
+  };
 
-  return <LiveStreamWrapper {...props} />;
+  return (
+    <StreamProvider streamData={streamData}>
+      {props.type === "vod" || props.type === "clip" ? (
+        <WatchContent />
+      ) : (
+        <LiveStreamWrapper />
+      )}
+    </StreamProvider>
+  );
 };
 
 export default WatchWrapper;

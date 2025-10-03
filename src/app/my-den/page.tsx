@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { api } from "~/trpc/server";
+// tRPC removed - using dummy data instead
 
 export default async function MyDen() {
-  const channel = await api.channel.getMyChannel();
+  const channel = await // Dummy API call: api.channel.getMyChannel();
 
   if (!channel) redirect("/");
   else redirect(`/${channel.handle}`);

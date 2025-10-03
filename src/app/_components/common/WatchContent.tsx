@@ -5,9 +5,10 @@ import SideDrawer from "../LiveStream/SideDrawer";
 import StreamDetails from "../LiveStream/StreamDetails";
 import HlsPlayer from "./HlsPlayer";
 import LiveStreamRenderer from "./LiveStreamRenderer";
-import type { WatchProps } from "./WatchWrapper";
+import { useStreamData } from "./StreamContext";
 
-const WatchContent = (props: WatchProps) => {
+const WatchContent = () => {
+  const { streamData } = useStreamData();
   const [isSideDrawerOpen, setIsSideDrawerOpen] = useState(true);
   const { isMobile } = useMobile();
 
@@ -25,34 +26,34 @@ const WatchContent = (props: WatchProps) => {
       >
         <div className="mac-13:h-[111%] mac-13:w-[111%] mac-13:origin-[0%_0%] mac-13:scale-[0.9]">
           <div className="w-full 2xl:w-3/4 mx-auto aspect-video">
-            {props.hlsUrl ? (
+            {streamData.streamUrl ? (
               <div className="w-full h-full">
                 <HlsPlayer
-                  src={props.hlsUrl}
+                  src={streamData.streamUrl}
                   controls
                   muted={false}
-                  absStart={props.absStart}
-                  absEnd={props.absEnd}
+                  absStart={undefined}
+                  absEnd={undefined}
                 />
               </div>
             ) : (
               <LiveStreamRenderer
-                streamId={props.streamId}
-                demoPlaybackId={props.demoPlaybackId}
+                streamId={streamData.streamId}
+                demoPlaybackId={streamData.demoPlaybackId}
               />
             )}
           </div>
 
-          <StreamDetails {...props} />
+          <StreamDetails />
         </div>
       </motion.div>
       <SideDrawer
         isSideDrawerOpen={isSideDrawerOpen}
         setIsSideDrawerOpen={setIsSideDrawerOpen}
-        streamId={props.streamId}
-        creatorTokenSymbol={props.channel.creatorTokenSymbol}
-        creatorTokenAddress={props.channel.creatorTokenAddress}
-        type={props.type}
+        streamId={streamData.streamId}
+        creatorTokenSymbol={streamData.channel.creatorTokenSymbol}
+        creatorTokenAddress={streamData.channel.creatorTokenAddress}
+        type={streamData.type}
       />
     </div>
   );

@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { api } from "~/trpc/react";
+// tRPC removed - using dummy data instead
 import { SendTipButton, SendTipButtonRoom } from "./SendTipButton";
 
 interface TipStreamerPopoverProps {
@@ -56,11 +56,8 @@ const TipStreamerPopover = ({
     "preset" | "other"
   >("preset");
 
-  const { data: tokens, isLoading } = api.tip.getTokenBalances.useQuery({
-    address: address as `0x${string}`,
-    creatorTokenSymbol,
-    creatorTokenAddress,
-  });
+  // Dummy data for token balances
+  const data = { data: [], isLoading: false, error: null };
 
   // Define preset token addresses for easy reference
   const presetTokenAddresses = {

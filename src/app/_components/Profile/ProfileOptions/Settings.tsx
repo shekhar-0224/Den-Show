@@ -4,16 +4,22 @@ import React from "react";
 import { toast } from "sonner";
 import { logout } from "~/app/_actions";
 import { Button } from "~/components/ui/button";
-import { api } from "~/trpc/react";
+// tRPC removed - using dummy data instead
 
 const Settings = () => {
   const { logout: privyLogout, unlinkTwitter, unlinkFarcaster } = usePrivy();
   const router = useRouter();
 
-  const { mutate: linkSocialAccount } =
-    api.user.linkSocialAccount.useMutation();
+  // Dummy mutations
+  const linkSocialAccountMutation = async (data: any) => {
+    console.log("Dummy social account link:", data);
+    return { success: true };
+  };
 
-  const { mutate: linkEmailMutation } = api.user.linkEmail.useMutation();
+  const linkEmailMutation = async (data: any) => {
+    console.log("Dummy email link:", data);
+    return { success: true };
+  };
 
   const { linkTwitter, linkFarcaster, linkEmail } = useLinkAccount({
     onSuccess: ({ user, linkMethod, linkedAccount }) => {
@@ -54,7 +60,8 @@ const Settings = () => {
     router.push("/");
   };
 
-  const { data: profileDetails } = api.profile.getProfileDetails.useQuery();
+  // Dummy query for profile.getProfileDetails.useQuery()
+  const data = { data: [], isLoading: false, error: null };
 
   if (!profileDetails) return null;
 

@@ -1,16 +1,17 @@
 import React from "react";
 import { Card } from "~/components/ui/card";
 
-import { api } from "~/trpc/react";
+// tRPC removed - using dummy data instead
 
 interface CreatorTokenStatsProps {
   tokenAddress: string;
 }
 
 const CreatorTokenStats = ({ tokenAddress }: CreatorTokenStatsProps) => {
-  const { data: marketData } = api.token.getMarketData.useQuery({
+  // Dummy query for token.getMarketData.useQuery({
     tokenAddress,
-  });
+  })
+  const data = { data: [], isLoading: false, error: null };
 
   if (!marketData) return null;
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { TRPCError } from "@trpc/server";
-import { api } from "~/trpc/server";
+// tRPC removed - using dummy data instead
 import type { CreateChannelAtom } from "../_atoms/createChannel.atom";
 
 export const loginWithEmail = async ({
@@ -12,7 +12,8 @@ export const loginWithEmail = async ({
   address: string;
 }) => {
   try {
-    const res = await api.auth.loginWithEmail({ email, address });
+    // Dummy API call
+    const res = { success: true, user: { email, address } };
     return res;
   } catch (error) {
     console.error(error);
@@ -34,12 +35,8 @@ export const loginWithSocialAccount = async ({
   address: string;
 }) => {
   try {
-    const res = await api.auth.loginWithSocialAccount({
-      type,
-      id,
-      username,
-      address,
-    });
+    // Dummy API call
+    const res = { success: true, user: { type, id, username, address } };
     return res;
   } catch (error) {
     console.error(error);
@@ -51,7 +48,8 @@ export const loginWithSocialAccount = async ({
 
 export const logout = async () => {
   try {
-    await api.auth.logout();
+    // Dummy API call
+    console.log("Dummy logout");
   } catch (error) {
     console.error(error);
   }
@@ -63,7 +61,8 @@ export const createChannel = async (
     profileUrl: string | undefined;
   },
 ) => {
-  await api.channel.create({
+  // Dummy API call
+  console.log("Dummy channel creation:", {
     name: channel.channelName,
     bio: channel.channelAbout,
     nsfw: channel.nsfw,

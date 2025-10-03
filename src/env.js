@@ -11,8 +11,8 @@ export const env = createEnv({
     CONVEX_DEPLOYMENT: z.string(),
     DATABASE_URL: z.url(),
     JWT_SECRET: z.string(),
-    LIVEKIT_API_KEY: z.string(),
-    LIVEKIT_API_SECRET: z.string(),
+    // LIVEKIT_API_KEY: z.string(), // LiveKit removed - using Mux instead
+    // LIVEKIT_API_SECRET: z.string(), // LiveKit removed - using Mux instead
     S3_ACCESS_KEY_ID: z.string(),
     S3_ACCESS_KEY_SECRET: z.string(),
     R2_ACCOUNT_ID: z.string(),
@@ -33,7 +33,7 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_PRIVY_APP_ID: z.string(),
-    NEXT_PUBLIC_LIVEKIT_URL: z.string(),
+    // NEXT_PUBLIC_LIVEKIT_URL: z.string(), // LiveKit removed - using Mux instead
     NEXT_PUBLIC_ONCHAINKIT_API_KEY: z.string(),
     NEXT_PUBLIC_CONVEX_URL: z.url(),
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
@@ -49,8 +49,8 @@ export const env = createEnv({
     CONVEX_DEPLOYMENT: process.env.CONVEX_DEPLOYMENT,
     DATABASE_URL: process.env.DATABASE_URL,
     JWT_SECRET: process.env.JWT_SECRET,
-    LIVEKIT_API_KEY: process.env.LIVEKIT_API_KEY,
-    LIVEKIT_API_SECRET: process.env.LIVEKIT_API_SECRET,
+    // LIVEKIT_API_KEY: process.env.LIVEKIT_API_KEY, // LiveKit removed - using Mux instead
+    // LIVEKIT_API_SECRET: process.env.LIVEKIT_API_SECRET, // LiveKit removed - using Mux instead
     S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID,
     S3_ACCESS_KEY_SECRET: process.env.S3_ACCESS_KEY_SECRET,
     R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
@@ -61,7 +61,7 @@ export const env = createEnv({
     API_KEY_0X: process.env.API_KEY_0X,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_PRIVY_APP_ID: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
-    NEXT_PUBLIC_LIVEKIT_URL: process.env.NEXT_PUBLIC_LIVEKIT_URL,
+    // NEXT_PUBLIC_LIVEKIT_URL: process.env.NEXT_PUBLIC_LIVEKIT_URL, // LiveKit removed - using Mux instead
     NEXT_PUBLIC_ONCHAINKIT_API_KEY: process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY,
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,

@@ -1,5 +1,5 @@
 import WatchWrapper from "~/app/_components/common/WatchWrapper";
-import { api } from "~/trpc/server";
+// tRPC removed - using dummy data instead
 
 export default async function Watch({
   params,
@@ -9,7 +9,7 @@ export default async function Watch({
   const streamId = (await params).streamId;
 
   const { vodUrl, streamDescription, streamTitle, startedAt, channel } =
-    await api.stream.getStreamInfo({
+    await // Dummy API call: api.stream.getStreamInfo({
       streamId,
     });
 
