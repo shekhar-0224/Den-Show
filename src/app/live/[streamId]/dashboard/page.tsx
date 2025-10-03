@@ -8,28 +8,18 @@ export default async function StreamDashboard({
 }) {
   const streamId = (await params).streamId;
 
-  const [
-    { streamKey, streamUrl },
-    { streamTitle, streamDescription, channel },
-  ] = await Promise.all([
-    // Dummy API call: api.stream.getRTMPInfo({
-      streamId,
-    }),
-    api.stream.getStreamInfo({
-      streamId,
-    }),
-  ]);
+  return <div>Stream Dashboard for {streamId} - Coming Soon!</div>;
 
-  return (
-    <WatchWrapper
-      channel={channel}
-      streamId={streamId}
-      streamTitle={streamTitle}
-      streamDescription={streamDescription ?? undefined}
-      streamUrl={streamUrl}
-      streamKey={streamKey}
-      isDashboard={true}
-      type="live"
-    />
-  );
+  // return (
+  //   <WatchWrapper
+  //     channel={channel}
+  //     streamId={streamId}
+  //     streamTitle={streamTitle}
+  //     streamDescription={streamDescription ?? undefined}
+  //     streamUrl={streamUrl}
+  //     streamKey={streamKey}
+  //     isDashboard={true}
+  //     type="live"
+  //   />
+  // );
 }

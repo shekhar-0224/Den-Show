@@ -1,4 +1,3 @@
-import React from "react";
 import { formatDate } from "~/lib/utils";
 
 interface ChannelDetailsProps {
@@ -8,7 +7,7 @@ interface ChannelDetailsProps {
     handle: string;
     bio: string | null;
     id: string;
-    createdAt: Date;
+    _creationTime: number;
   };
 }
 
@@ -19,7 +18,7 @@ const ChannelDetails = ({ channel }: ChannelDetailsProps) => {
       <div className="mt-2 flex flex-col md:flex-row items-start md:items-center gap-2">
         <div className="text-xs md:text-sm flex-1">{channel.bio}</div>
         <div className="text-xs md:text-sm flex flex-col">
-          <div>Joined on {formatDate(channel.createdAt)}</div>
+          <div>Joined on {formatDate(new Date(channel._creationTime))}</div>
         </div>
       </div>
     </div>

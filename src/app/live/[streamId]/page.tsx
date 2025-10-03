@@ -1,5 +1,8 @@
+import { preloadedQueryResult, preloadQuery } from "convex/nextjs";
 import { redirect } from "next/navigation";
-import WatchWrapper from "~/app/_components/common/WatchWrapper";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
+import WatchContent from "../../_components/common/WatchContent";
 // tRPC removed - using dummy data instead
 
 export default async function LiveStream({
@@ -7,40 +10,19 @@ export default async function LiveStream({
 }: {
   params: Promise<{ streamId: string }>;
 }) {
-  const streamId = (await params).streamId;
+  const streamId = (await params).streamId as Id<"streams">;
 
-  const { streamTitle, streamDescription, channel, isMyStream, demoPlaybackId } = {
-    streamTitle: "Ishan Live Stream",
-    streamDescription: "Join xyz",
-    demoPlaybackId: "DS00Spx1CV902MCtPj5WknGlR102V5HFkDe",
-    channel: {
-      id: "ishan",
-      bio: "Welcome",
-      profileUrl: "/images/default-pfp.png",
-      name: "New Streamer",
-      handle: "demostreamer",
-      createdAt: new Date("2024-01-01"),
-      creatorTokenSymbol: "DEMO",
-      creatorTokenAddress: "0x1234567890abcdef",
-      user: {
-        id: "ishan",
-        denWalletAddress: "0xabcdef1234567890",
-      },
-    },
-    isMyStream: false,
-  };
+  const preLoadedStream = await preloadQuery(api.stream.getStream, {
+    streamId,
+  }).catch(() => null);
 
-  if (isMyStream) return redirect(`/live/${streamId}/dashboard`);
+  if (!preLoadedStream) redirect("/404");
 
-  return (
-    <WatchWrapper
-      channel={channel}
-      streamId={streamId}
-      streamTitle={streamTitle}
-      streamDescription={streamDescription ?? undefined}
-      demoPlaybackId={demoPlaybackId}
-      isDashboard={false}
-      type="live"
-    />
-  );
+  const stream = preloadedQueryResult(preLoadedStream);
+
+  if (!stream) redirect("/404");
+
+  // if (isMyStream) return redirect(`/live/${streamId}/dashboard`);
+
+  return <WatchContent preLoadedStream={preLoadedStream} />;
 }

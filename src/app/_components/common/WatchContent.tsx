@@ -1,16 +1,28 @@
+"use client";
+
+import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { useMobile } from "~/app/_hooks/useMobile";
+import { api } from "../../../../convex/_generated/api";
 import SideDrawer from "../LiveStream/SideDrawer";
 import StreamDetails from "../LiveStream/StreamDetails";
-import HlsPlayer from "./HlsPlayer";
-import LiveStreamRenderer from "./LiveStreamRenderer";
-import { useStreamData } from "./StreamContext";
+import MuxPlayerComponent from "./MuxPlayer";
 
-const WatchContent = () => {
-  const { streamData } = useStreamData();
+const WatchContent = ({
+  preLoadedStream,
+}: {
+  preLoadedStream: Preloaded<typeof api.stream.getStream>;
+}) => {
+  const streamData = usePreloadedQuery(preLoadedStream);
+  const myChannel = useQuery(api.channel.getMyChannel);
+
   const [isSideDrawerOpen, setIsSideDrawerOpen] = useState(true);
   const { isMobile } = useMobile();
+
+  if (!streamData) return <div>Stream not found</div>;
+
+  const isMyStream = streamData.channel._id === myChannel?._id;
 
   return (
     <div className="bg-black text-white h-full p-4 flex flex-col md:flex-row gap-4 overflow-hidden">
@@ -26,34 +38,26 @@ const WatchContent = () => {
       >
         <div className="mac-13:h-[111%] mac-13:w-[111%] mac-13:origin-[0%_0%] mac-13:scale-[0.9]">
           <div className="w-full 2xl:w-3/4 mx-auto aspect-video">
-            {streamData.streamUrl ? (
-              <div className="w-full h-full">
-                <HlsPlayer
-                  src={streamData.streamUrl}
-                  controls
-                  muted={false}
-                  absStart={undefined}
-                  absEnd={undefined}
-                />
-              </div>
-            ) : (
-              <LiveStreamRenderer
-                streamId={streamData.streamId}
-                demoPlaybackId={streamData.demoPlaybackId}
-              />
-            )}
+            <MuxPlayerComponent
+              title={streamData.stream.title}
+              streamId={streamData.stream._id}
+              playbackId={
+                streamData.stream.playbackId ??
+                "DS00Spx1CV902MCtPj5WknGlR102V5HFkDe"
+              } // TODO: replace hardcorded value
+            />
           </div>
 
-          <StreamDetails />
+          <StreamDetails streamId={streamData.stream._id} />
         </div>
       </motion.div>
       <SideDrawer
         isSideDrawerOpen={isSideDrawerOpen}
         setIsSideDrawerOpen={setIsSideDrawerOpen}
-        streamId={streamData.streamId}
-        creatorTokenSymbol={streamData.channel.creatorTokenSymbol}
-        creatorTokenAddress={streamData.channel.creatorTokenAddress}
-        type={streamData.type}
+        streamId={streamData.stream._id}
+        creatorTokenSymbol={streamData.channel.token.symbol}
+        creatorTokenAddress={streamData.channel.token.address}
+        type="live"
       />
     </div>
   );

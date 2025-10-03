@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { streamStates } from "./schema";
 import { getUserFromCtx } from "./utils/users";
@@ -156,14 +155,10 @@ export const updateStreamStatus = internalMutation({
   },
 });
 
-export const getStreamFromStreamKey = query({
+export const updatePlaybackId = internalMutation({
   args: {
-    streamId: v.string(),
+    streamId: v.id("streams"),
+    playbackId: v.string(),
   },
-  handler: async (ctx, args) => {
-    const creds = await ctx.db
-      .query("channelCreds")
-      .withIndex("by_muxStreamId", (q) => q.eq("muxStreamId", args.streamId))
-      .first();
-  },
+  handler: async (ctx, args) => {},
 });
