@@ -58,6 +58,8 @@ export const handleWebhook = internalAction({
 
     switch (event.type) {
       case "video.live_stream.active": {
+        const streamId = event.data.id;
+
         break;
       }
     }

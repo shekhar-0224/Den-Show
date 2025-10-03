@@ -51,9 +51,11 @@ export default defineSchema({
 
   channelCreds: defineTable({
     channelId: v.id("channels"),
-    streamId: v.string(),
-    streamKey: v.string(),
-  }).index("by_channelId", ["channelId"]),
+    muxStreamId: v.string(),
+    muxStreamKey: v.string(),
+  })
+    .index("by_channelId", ["channelId"])
+    .index("by_muxStreamId", ["muxStreamId"]),
 
   streams: defineTable({
     channelId: v.id("channels"),
