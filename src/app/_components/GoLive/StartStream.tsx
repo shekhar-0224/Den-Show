@@ -301,7 +301,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
                 <Input
                   id="categories"
                   placeholder="Pick channel category"
-                  className="text-sm py-6 pr-10 w-full cursor-pointer"
+                  className="text-sm py-6 pr-10 w-full cursor-pointer shadow-small"
                   value={formData.categories.length > 0 ? formData.categories.join(", ") : ""}
                   readOnly
                   onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
@@ -314,7 +314,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
                 </div>
                 
                 {showCategoryDropdown && (
-                  <div className="absolute top-full left-0 mt-1 bg-white border border-black rounded-b-lg shadow-lg z-50 w-full">
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-black shadow-small z-50 w-full">
                     {categories.map((category, index) => (
                       <div key={category} className="flex items-center justify-between px-3 py-2 border-b border-black last:border-b-0">
                         <span className="text-sm text-black">{category}</span>
