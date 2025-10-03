@@ -127,6 +127,32 @@ export const getMyChannel = query({
   },
 });
 
+export const getMyStreamingCreds = query({
+  handler: async (ctx) => {
+    const user = await getUserFromCtx(ctx);
+
+    if (!user) {
+      return null;
+    }
+
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .first();
+
+    if (!channel) {
+      return null;
+    }
+
+    const creds = await ctx.db
+      .query("channelCreds")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channel._id))
+      .first();
+
+    return creds;
+  },
+});
+
 export const getChannelByHandle = query({
   args: {
     handle: v.string(),
