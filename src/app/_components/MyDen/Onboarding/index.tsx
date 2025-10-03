@@ -1,6 +1,7 @@
 import { useWallets } from "@privy-io/react-auth";
 import { Label } from "@radix-ui/react-label";
 import { useMutation as useCvxMutation } from "convex/react";
+import { useForm } from "@tanstack/react-form";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -51,33 +52,60 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
 
   const [formData, setFormData] = useCreateChannelAtom();
 
+  // TanStack Form setup
+  const form = useForm({
+    defaultValues: {
+      channelName: formData.channelName || "",
+      channelHandle: formData.channelHandle || "",
+      channelAbout: formData.channelAbout || "",
+      nsfw: formData.nsfw || false,
+      tncAccepted: formData.tncAccepted || false,
+      language: formData.language || "English",
+      fanSubscriptionFee: formData.fanSubscriptionFee || 0,
+      token: {
+        isClanker: formData.token.isClanker || false,
+        address: formData.token.address || "",
+        symbol: formData.token.symbol || "",
+      },
+      pfp: formData.pfp || null,
+      banner: formData.banner || null,
+    },
+    onSubmit: async ({ value }) => {
+      // This will be handled by the existing handleCreateDen function
+      console.log("Form submitted with values:", value);
+    },
+  });
+
   const handlePFPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setFormData({ ...formData, pfp: file });
+    if (file) {
+      form.setFieldValue("pfp", file);
+      setFormData({ ...formData, pfp: file });
+    }
   };
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setFormData({ ...formData, banner: file });
+    if (file) {
+      form.setFieldValue("banner", file);
+      setFormData({ ...formData, banner: file });
+    }
   };
 
   const isFormValid = useMemo(() => {
-    if (
-      !formData.channelName ||
-      !formData.channelHandle ||
-      !formData.channelAbout ||
-      !formData.tncAccepted ||
-      !formData.token.symbol ||
-      (!formData.token.isClanker && !formData.token.address)
-    ) {
-      return false;
-    }
-    return true;
-  }, [formData]);
+    const values = form.getFieldValue("channelName") && 
+      form.getFieldValue("channelHandle") &&
+      form.getFieldValue("channelAbout") &&
+      form.getFieldValue("tncAccepted") &&
+      form.getFieldValue("token.symbol") &&
+      (form.getFieldValue("token.isClanker") || form.getFieldValue("token.address"));
+    
+    return !!values;
+  }, [form]);
 
   const [isCreatingChannel, setIsCreatingChannel] = useState(false);
 
-  const [debouncedHandle] = useDebounceValue(formData.channelHandle, 500);
+  const [debouncedHandle] = useDebounceValue(form.getFieldValue("channelHandle"), 500);
 
   // Dummy data for handle availability
   const isHandleAvailable =
@@ -98,32 +126,35 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
     try {
       setIsCreatingChannel(true);
 
+      const formValues = form.getFieldValue;
       let bannerPicId: Id<"_storage"> | undefined;
       let profilePicId: Id<"_storage"> | undefined;
 
-      if (formData.banner) {
-        bannerPicId = await mutateAsync(formData.banner);
+      const bannerFile = formValues("banner");
+      if (bannerFile) {
+        bannerPicId = await mutateAsync(bannerFile);
       }
 
-      if (formData.pfp) {
-        profilePicId = await mutateAsync(formData.pfp);
+      const pfpFile = formValues("pfp");
+      if (pfpFile) {
+        profilePicId = await mutateAsync(pfpFile);
       }
 
       await createChannel({
-        name: formData.channelName,
-        handle: formData.channelHandle,
-        bio: formData.channelAbout,
-        nsfw: formData.nsfw,
-        fanPassValue: formData.fanSubscriptionFee,
+        name: formValues("channelName"),
+        handle: formValues("channelHandle"),
+        bio: formValues("channelAbout"),
+        nsfw: formValues("nsfw"),
+        fanPassValue: formValues("fanSubscriptionFee"),
         bannerPicId,
         profilePicId,
-        language: formData.language,
+        language: formValues("language"),
         creatorAddress: embedWallet.address,
         // TODO: hande this logix
         token: {
-          address: formData.token.address ?? "TODO",
-          symbol: formData.token.symbol,
-          source: formData.token.isClanker ? "clanker" : "other",
+          address: formValues("token.address") ?? "TODO",
+          symbol: formValues("token.symbol"),
+          source: formValues("token.isClanker") ? "clanker" : "other",
         },
       });
 
@@ -140,18 +171,25 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
 
   if (step === "details")
     return (
-      <div className="w-full">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+        className="w-full"
+      >
         <div className="w-full relative">
           <div
             className={cn(
               "cursor-pointer w-full relative h-[160px]",
-              !formData.banner && "bg-primary"
+              !form.getFieldValue("banner") && "bg-primary"
             )}
             onClick={() => document.getElementById("cover-input")?.click()}
           >
-            {formData.banner ? (
+            {form.getFieldValue("banner") ? (
               <Image
-                src={URL.createObjectURL(formData.banner)}
+                src={URL.createObjectURL(form.getFieldValue("banner")!)}
                 alt="Cover"
                 width={0}
                 height={0}
@@ -179,9 +217,9 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             className="cursor-pointer absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 h-28 flex items-center justify-center rounded-full group"
             onClick={() => document.getElementById("pfp-input")?.click()}
           >
-            {formData.pfp ? (
+            {form.getFieldValue("pfp") ? (
               <Image
-                src={URL.createObjectURL(formData.pfp)}
+                src={URL.createObjectURL(form.getFieldValue("pfp")!)}
                 alt="PFP"
                 width={112}
                 height={112}
@@ -214,19 +252,31 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
               <label className="uppercase text-xs" htmlFor="channel-name">
                 Channel Name
               </label>
-              <Input
-                maxLength={30}
-                id="channel-name"
-                placeholder="@mizanxali's Den"
-                className="text-sm py-6 shadow-small"
-                value={formData.channelName}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    channelName: e.target.value,
-                  })
-                }
-              />
+              <form.Field
+                name="channelName"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value ? "Channel name is required" : undefined,
+                }}
+              >
+                {(field) => (
+                  <Input
+                    maxLength={30}
+                    id="channel-name"
+                    placeholder="@mizanxali's Den"
+                    className="text-sm py-6 shadow-small"
+                    value={field.state.value}
+                    onChange={(e) => {
+                      field.handleChange(e.target.value);
+                      setFormData({
+                        ...formData,
+                        channelName: e.target.value,
+                      });
+                    }}
+                    onBlur={field.handleBlur}
+                  />
+                )}
+              </form.Field>
             </div>
 
             <div className="flex flex-1 flex-col gap-2">
@@ -252,31 +302,45 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
                   </TooltipContent>
                 </Tooltip>
               </div>
-              {formData.token.isClanker ? (
+              {form.getFieldValue("token.isClanker") ? (
                 <div className="flex rounded-base items-stretch shadow-small">
                   <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
                     $
                   </div>
-                  <Input
-                    maxLength={10}
-                    className="flex-1 outline-none text-sm px-2.5 py-4 h-full border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    id="symbol"
-                    placeholder="BTC"
-                    value={formData.token.symbol}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        token: {
-                          ...formData.token,
-                          symbol: e.target.value,
-                        },
-                      })
-                    }
-                  />
+                  <form.Field
+                    name="token.symbol"
+                    validators={{
+                      onChange: ({ value }) =>
+                        !value ? "Token symbol is required" : undefined,
+                    }}
+                  >
+                    {(field) => (
+                      <Input
+                        maxLength={10}
+                        className="flex-1 outline-none text-sm px-2.5 py-4 h-full border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        id="symbol"
+                        placeholder="BTC"
+                        value={field.state.value}
+                        onChange={(e) => {
+                          field.handleChange(e.target.value);
+                          setFormData({
+                            ...formData,
+                            token: {
+                              ...formData.token,
+                              symbol: e.target.value,
+                            },
+                          });
+                        }}
+                        onBlur={field.handleBlur}
+                      />
+                    )}
+                  </form.Field>
                 </div>
               ) : (
                 <TokenSearch
                   onTokenSelect={(token) => {
+                    form.setFieldValue("token.address", token.address);
+                    form.setFieldValue("token.symbol", token.symbol);
                     setFormData({
                       ...formData,
                       token: {
@@ -290,17 +354,21 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
               )}
               <div className="text-xs text-gray-700 flex items-center gap-1 mt-1">
                 <div>
-                  {formData.token.isClanker
+                  {form.getFieldValue("token.isClanker")
                     ? "I already have a token."
                     : "I don't have a token."}
                 </div>
                 <button
                   type="button"
                   onClick={() => {
+                    const newIsClanker = !form.getFieldValue("token.isClanker");
+                    form.setFieldValue("token.isClanker", newIsClanker);
+                    form.setFieldValue("token.address", "");
+                    form.setFieldValue("token.symbol", "");
                     setFormData({
                       ...formData,
                       token: {
-                        isClanker: !formData.token.isClanker,
+                        isClanker: newIsClanker,
                         address: "",
                         symbol: "",
                       },
@@ -308,7 +376,7 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
                   }}
                   className="text-primary font-bold hover:underline cursor-pointer"
                 >
-                  {formData.token.isClanker
+                  {form.getFieldValue("token.isClanker")
                     ? "SEARCH for my token."
                     : "CREATE ONE for me."}
                 </button>
@@ -321,18 +389,30 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
               <label className="uppercase text-xs" htmlFor="channel-about">
                 About Channel
               </label>
-              <Textarea
-                id="channel-about"
-                className="text-sm h-36"
-                placeholder="Write about your channel here"
-                value={formData.channelAbout}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    channelAbout: e.target.value,
-                  })
-                }
-              />
+              <form.Field
+                name="channelAbout"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value ? "Channel description is required" : undefined,
+                }}
+              >
+                {(field) => (
+                  <Textarea
+                    id="channel-about"
+                    className="text-sm h-36"
+                    placeholder="Write about your channel here"
+                    value={field.state.value}
+                    onChange={(e) => {
+                      field.handleChange(e.target.value);
+                      setFormData({
+                        ...formData,
+                        channelAbout: e.target.value,
+                      });
+                    }}
+                    onBlur={field.handleBlur}
+                  />
+                )}
+              </form.Field>
             </div>
           </div>
 
@@ -345,23 +425,36 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
                 <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
                   den.show/
                 </div>
-                <Input
-                  maxLength={30}
-                  className="flex-1 outline-none text-sm px-2.5 py-4 h-full border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                  type="text"
-                  placeholder="your-channel-handle"
-                  value={formData.channelHandle}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      channelHandle: e.target.value.toLowerCase(),
-                    })
-                  }
-                />
+                <form.Field
+                  name="channelHandle"
+                  validators={{
+                    onChange: ({ value }) =>
+                      !value ? "Channel handle is required" : undefined,
+                  }}
+                >
+                  {(field) => (
+                    <Input
+                      maxLength={30}
+                      className="flex-1 outline-none text-sm px-2.5 py-4 h-full border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                      type="text"
+                      placeholder="your-channel-handle"
+                      value={field.state.value}
+                      onChange={(e) => {
+                        const value = e.target.value.toLowerCase();
+                        field.handleChange(value);
+                        setFormData({
+                          ...formData,
+                          channelHandle: value,
+                        });
+                      }}
+                      onBlur={field.handleBlur}
+                    />
+                  )}
+                </form.Field>
               </div>
               <div className="text-xs text-gray-700">
                 {RESERVED_HANDLES.includes(
-                  formData.channelHandle.toLowerCase()
+                  form.getFieldValue("channelHandle").toLowerCase()
                 ) ? (
                   <span className="text-red-500">Invalid handle</span>
                 ) : isLoadingHandleAvailable ? (
@@ -379,60 +472,89 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             </div>
 
             <div className="flex flex-col gap-2 h-full self-stretch flex-1">
-              <label className="uppercase text-xs" htmlFor="channel-handle">
+              <label className="uppercase text-xs" htmlFor="language">
                 Select Language [for chat]
               </label>
-              <Select
-                value={formData.language}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, language: value })
-                }
+              <form.Field
+                name="language"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value ? "Language is required" : undefined,
+                }}
               >
-                <SelectTrigger className="h-12 w-full shadow-small">
-                  <SelectValue
-                    placeholder="Select a language for chat"
-                    className="py-1"
+                {(field) => (
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(value) => {
+                      field.handleChange(value);
+                      setFormData({ ...formData, language: value });
+                    }}
                   >
-                    {formData.language}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="English">English</SelectItem>
-                  <SelectItem value="Spanish">Spanish</SelectItem>
-                  <SelectItem value="Portuguese">Portuguese</SelectItem>
-                  <SelectItem value="Chinese">Chinese</SelectItem>
-                  <SelectItem value="Russian">Russian</SelectItem>
-                  <SelectItem value="Vietnamese">Vietnamese</SelectItem>
-                  <SelectItem value="Filipino">Filipino</SelectItem>
-                  <SelectItem value="Korean">Korean</SelectItem>
-                  <SelectItem value="French">French</SelectItem>
-                  <SelectItem value="Japanese">Japanese</SelectItem>
-                </SelectContent>
-              </Select>
+                    <SelectTrigger className="h-12 w-full shadow-small">
+                      <SelectValue
+                        placeholder="Select a language for chat"
+                        className="py-1"
+                      >
+                        {field.state.value}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="English">English</SelectItem>
+                      <SelectItem value="Spanish">Spanish</SelectItem>
+                      <SelectItem value="Portuguese">Portuguese</SelectItem>
+                      <SelectItem value="Chinese">Chinese</SelectItem>
+                      <SelectItem value="Russian">Russian</SelectItem>
+                      <SelectItem value="Vietnamese">Vietnamese</SelectItem>
+                      <SelectItem value="Filipino">Filipino</SelectItem>
+                      <SelectItem value="Korean">Korean</SelectItem>
+                      <SelectItem value="French">French</SelectItem>
+                      <SelectItem value="Japanese">Japanese</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </form.Field>
             </div>
           </div>
 
           <div className="flex items-center space-x-2 mt-4">
-            <Switch
-              id="18-plus"
-              checked={formData.nsfw}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, nsfw: checked })
-              }
-            />
+            <form.Field
+              name="nsfw"
+            >
+              {(field) => (
+                <Switch
+                  id="18-plus"
+                  checked={field.state.value}
+                  onCheckedChange={(checked) => {
+                    field.handleChange(checked);
+                    setFormData({ ...formData, nsfw: checked });
+                  }}
+                />
+              )}
+            </form.Field>
             <Label htmlFor="18-plus" className="font-base text-sm">
               My channel caters to 18+ audience only
             </Label>
           </div>
 
           <div className="flex items-center space-x-2 mt-4">
-            <Switch
-              id="tnc"
-              checked={formData.tncAccepted}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, tncAccepted: checked })
-              }
-            />
+            <form.Field
+              name="tncAccepted"
+              validators={{
+                onChange: ({ value }) =>
+                  !value ? "You must accept the terms and conditions" : undefined,
+              }}
+            >
+              {(field) => (
+                <Switch
+                  id="tnc"
+                  checked={field.state.value}
+                  onCheckedChange={(checked) => {
+                    field.handleChange(checked);
+                    setFormData({ ...formData, tncAccepted: checked });
+                  }}
+                />
+              )}
+            </form.Field>
             <Label htmlFor="tnc" className="font-base text-sm">
               I've read the content & moderation Community Guidelines and agree
               to Den's T&C & Privacy Policy
@@ -447,14 +569,14 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
                 !isFormValid ||
                 isLoadingHandleAvailable ||
                 !isHandleAvailable ||
-                RESERVED_HANDLES.includes(formData.channelHandle.toLowerCase())
+                RESERVED_HANDLES.includes(form.getFieldValue("channelHandle").toLowerCase())
               }
             >
               {isCreatingChannel ? "Processing..." : "Next"}
             </Button>
           </div>
         </div>
-      </div>
+      </form>
     );
 
   if (step === "tier")
@@ -462,9 +584,9 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
       <>
         <FanPassModalContent
           channelProfileUrl={"/images/default-channel-logo.png"}
-          channelName={formData.channelName}
-          channelHandle={formData.channelHandle}
-          creatorTokenSymbol={formData.token.symbol}
+          channelName={form.getFieldValue("channelName")}
+          channelHandle={form.getFieldValue("channelHandle")}
+          creatorTokenSymbol={form.getFieldValue("token.symbol")}
           isCreatingChannel
         />
         <div className="mt-6 flex justify-end">
