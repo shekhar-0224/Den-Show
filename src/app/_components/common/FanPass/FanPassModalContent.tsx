@@ -82,21 +82,21 @@ const FanPassModalContent = ({
         </div>
 
         {/* Right side - Price */}
-        <div className="flex-1 flex flex-col items-end gap-4">
-          <div className="text-right">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <div className="text-center">
             <div className="text-[#9da3ac] text-sm">Price</div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-black">10</span>
-              <span className="text-lg text-black">USDC</span>
+            <div className="flex items-baseline justify-center gap-2">
+              <span className="text-5xl font-bold text-black font-cream-medium">20</span>
+              <span className="text-xl text-black font-cream-medium">USDC</span>
             </div>
             <div className="border-b border-dotted border-gray-400 w-full mt-2"></div>
-            <div className="text-[#9da3ac] text-sm mt-2">= [1000{creatorTokenSymbol}]</div>
+            <div className="text-[#9da3ac] text-sm mt-2 font-cream-medium">= 100{creatorTokenSymbol}</div>
           </div>
           
-          <div className="text-right">
-            <div className="text-[#9da3ac] text-sm">Step 2 of 2</div>
+          <div className="text-center">
+            <div className="text-[#9da3ac] text-sm mb-2">Step 2 of 2</div>
             {!isCreatingChannel && (
-              <Button variant="primary" onClick={() => {}} className="mt-2">
+              <Button variant="primary" onClick={() => {}}>
                 Get Fan Pass
               </Button>
             )}
