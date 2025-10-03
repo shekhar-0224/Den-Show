@@ -43,8 +43,17 @@ const ProfileDetails = () => {
     isVerified: true,
     socialLinks: {
       twitter: "https://twitter.com/johndoe",
-      farcaster: "https://warpcast.com/johndoe"
-    }
+      farcaster: "https://warpcast.com/johndoe",
+    },
+    xHandle: "johndoe_x",
+    farcasterHandle: "johndoe_fc",
+    joinedOn: "2023-01-15T00:00:00Z",
+    clips: 42,
+    // minutesWatched: 1200,
+    // paidInSubscriptions: 500,
+    // denEarned: 150,
+    // tipsEarned: 75,
+    username: "johndoe",
   };
   const isLoading = false;
 
@@ -319,15 +328,7 @@ const ProfileDetails = () => {
           </div>
           {address ? (
             <div className="flex items-center gap-2">
-              <Button
-                onClick={() =>
-                  fundWallet(address, {
-                    chain: base,
-                  })
-                }
-              >
-                Add
-              </Button>
+              <Button onClick={() => fundWallet({ address })}>Add</Button>
               <Button>Withdraw</Button>
             </div>
           ) : (

@@ -57,7 +57,13 @@ const TipStreamerPopover = ({
   >("preset");
 
   // Dummy data for token balances
-  const data = { data: [], isLoading: false, error: null };
+  const tokens = {
+    address,
+    count: 0,
+    otherTokens: [] as TokenData[],
+    presetTokens: [] as TokenData[],
+  };
+  const isLoading = false;
 
   // Define preset token addresses for easy reference
   const presetTokenAddresses = {
@@ -84,10 +90,10 @@ const TipStreamerPopover = ({
 
     return (
       (tokens.presetTokens.find(
-        (t) => t.address === address,
+        (t) => t.address === address
       ) as TokenData | null) ||
       (tokens.otherTokens.find(
-        (t) => t.address === address,
+        (t) => t.address === address
       ) as TokenData | null) ||
       null
     );

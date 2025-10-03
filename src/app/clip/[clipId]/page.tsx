@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
-import WatchWrapper from "~/app/_components/common/WatchWrapper";
+// import { redirect } from "next/navigation";
+// import WatchWrapper from "~/app/_components/common/WatchWrapper";
 // tRPC removed - using dummy data instead
 
 export default async function Clip({
@@ -9,20 +9,20 @@ export default async function Clip({
 }) {
   const clipId = (await params).clipId;
 
-  const clip = await // Dummy API call: api.clips.getClipById({ clipId });
+  // if (!clip) return redirect("/not-found");
 
-  if (!clip) return redirect("/not-found");
+  return null;
 
-  return (
-    <WatchWrapper
-      hlsUrl={`https://cdn.den.show/${clip.streamId}.m3u8`}
-      absStart={clip.absStart}
-      absEnd={clip.absEnd}
-      streamTitle={clip.title}
-      channel={clip.stream.channel}
-      streamId={clip.stream.id}
-      isDashboard={false}
-      type="clip"
-    />
-  );
+  // return (
+  //   <WatchWrapper
+  //     hlsUrl={`https://cdn.den.show/${clip.streamId}.m3u8`}
+  //     absStart={clip.absStart}
+  //     absEnd={clip.absEnd}
+  //     streamTitle={clip.title}
+  //     channel={clip.stream.channel}
+  //     streamId={clip.stream.id}
+  //     isDashboard={false}
+  //     type="clip"
+  //   />
+  // );
 }

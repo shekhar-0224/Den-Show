@@ -39,18 +39,18 @@ const SwapWidget = ({
   const priceData = {
     data: { price: "0.001", estimatedGas: "0.0001" },
     isLoading: false,
-    error: null
+    error: null,
   };
 
   const quoteData = {
-    data: { 
-      buyAmount: "100", 
+    data: {
+      buyAmount: "100",
       sellAmount: "0.1",
       to: "0x1234567890123456789012345678901234567890",
-      data: "0x"
+      data: "0x",
     },
     isLoading: false,
-    error: null
+    error: null,
   };
 
   const handleSwap = async () => {
@@ -60,17 +60,17 @@ const SwapWidget = ({
     }
 
     setIsExecutingSwap(true);
-    
+
     try {
       // Simulate swap
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       toast.success("Swap completed successfully!");
       console.log("Dummy swap executed:", {
         mode,
         inputAmount,
         outputAmount,
-        creatorTokenAddress
+        creatorTokenAddress,
       });
     } catch (error) {
       toast.error("Swap failed");
@@ -84,7 +84,9 @@ const SwapWidget = ({
     return (
       <div className="bg-white text-black p-4 rounded-lg">
         <div className="text-center">
-          <p className="text-sm">Please connect your wallet to use the swap widget</p>
+          <p className="text-sm">
+            Please connect your wallet to use the swap widget
+          </p>
         </div>
       </div>
     );
@@ -96,14 +98,14 @@ const SwapWidget = ({
         <h3 className="font-semibold">Swap {creatorTokenSymbol}</h3>
         <div className="flex gap-2">
           <Button
-            variant={mode === "buy" ? "default" : "outline"}
+            variant={mode === "buy" ? "primary" : "default"}
             size="sm"
             onClick={() => setMode("buy")}
           >
             Buy
           </Button>
           <Button
-            variant={mode === "sell" ? "default" : "outline"}
+            variant={mode === "sell" ? "primary" : "default"}
             size="sm"
             onClick={() => setMode("sell")}
           >
@@ -151,7 +153,9 @@ const SwapWidget = ({
           disabled={isExecutingSwap || !inputAmount}
           className="w-full"
         >
-          {isExecutingSwap ? "Swapping..." : `Swap ${mode === "buy" ? "Buy" : "Sell"}`}
+          {isExecutingSwap
+            ? "Swapping..."
+            : `Swap ${mode === "buy" ? "Buy" : "Sell"}`}
         </Button>
       </div>
     </div>

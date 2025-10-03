@@ -1,8 +1,8 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import Image from "next/image";
-
-// tRPC removed - using dummy data instead
+import { api } from "../../../../convex/_generated/api";
 import BuyFanPassTrigger from "../common/FanPass/BuyFanPassTrigger";
 import SendTipTrigger from "../common/TipStreamer/SendTipTrigger";
 import ChannelStreams from "./ChannelStreams";
@@ -12,33 +12,22 @@ interface ChannelWrapperProps {
 }
 
 const ChannelWrapper = ({ handle }: ChannelWrapperProps) => {
-  const channel = null;
+  const channel = useQuery(api.channel.getChannelByHandle, { handle });
 
   // TODO: Add skeleton loading
 
   if (!channel) return null;
 
-  const {
-    channelId,
-    bannerUrl,
-    profileUrl,
-    name,
-    bio,
-    user: { xHandle, farcasterHandle },
-    fanCount,
-    videos,
-  } = channel;
-
   return (
     <div>
       <div className="flex flex-col">
         <div className="w-full relative h-[180px]">
-          {bannerUrl ? (
+          {channel.bannerPicUrl ? (
             <Image
-              src={bannerUrl}
+              src={channel.bannerPicUrl}
               width={0}
               height={0}
-              alt={name}
+              alt={channel.name}
               sizes="100vw"
               className="w-full h-full object-cover"
             />
@@ -50,38 +39,38 @@ const ChannelWrapper = ({ handle }: ChannelWrapperProps) => {
         <div className="flex items-start gap-4 p-4">
           <div>
             <Image
-              src={profileUrl ?? "/images/default-channel-logo.png"}
+              src={channel.profilePicUrl ?? "/images/default-channel-logo.png"}
               width={112}
               height={112}
-              alt={name}
+              alt={channel.name}
               className="object-cover rounded-full"
             />
           </div>
 
           <div className="flex flex-col flex-1">
-            <div className="text-2xl font-cream-medium">{name}</div>
+            <div className="text-2xl font-cream-medium">{channel.name}</div>
             <div className="font-medium text-sm flex items-center gap-2 mt-2">
               <div className="">@{handle}</div>
-              {xHandle && (
+              {channel.user?.loginMethod === "x" && (
                 <div className="border-l border-dashed border-black pl-2">
-                  X {` @${xHandle}`}
+                  X {` @${channel.user.username}`}
                 </div>
               )}
-              {farcasterHandle && (
+              {channel.user?.loginMethod === "farcaster" && (
                 <div className="border-l border-dashed border-black pl-2">
-                  Farcaster{` @${farcasterHandle}`}
+                  Farcaster{` @${channel.user.username}`}
                 </div>
               )}
             </div>
-            <div className="text-sm mt-1.5">{bio}</div>
+            <div className="text-sm mt-1.5">{channel.bio}</div>
             <div className="flex items-center gap-2 mt-1">
               <div className="text-sm border-r border-dashed border-black pr-2">
-                Fans{" "}
-                <span className="font-cream-medium text-base">{fanCount}</span>
+                Fans {/* TODO: update this */}
+                <span className="font-cream-medium text-base">{0}</span>
               </div>
               <div className="text-sm">
-                Videos{" "}
-                <span className="font-cream-medium text-base">{videos}</span>
+                Videos {/* TODO: update this */}
+                <span className="font-cream-medium text-base">{0}</span>
               </div>
             </div>
           </div>
@@ -92,26 +81,27 @@ const ChannelWrapper = ({ handle }: ChannelWrapperProps) => {
                 variant="primary"
                 side="bottom"
                 channelHandle={handle}
-                channelPfp={profileUrl}
-                streamerAddress={channel.user.denWalletAddress}
-                channelId={channelId}
-                creatorTokenSymbol={channel.creatorTokenSymbol}
-                creatorTokenAddress={channel.creatorTokenAddress}
+                channelPfp={channel.profilePicUrl}
+                // streamerAddress={channel.user.walletAddress}
+                streamerAddress={"0xGG"} // TODO: fix this
+                channelId={channel._id}
+                creatorTokenSymbol={channel.token.symbol}
+                creatorTokenAddress={channel.token.address}
               />
               <BuyFanPassTrigger
                 channelHandle={handle}
-                channelName={name}
+                channelName={channel.name}
                 channelProfileUrl={
-                  profileUrl ?? "/images/default-channel-logo.png"
+                  channel.profilePicUrl ?? "/images/default-channel-logo.png"
                 }
-                creatorTokenSymbol={channel.creatorTokenSymbol}
+                creatorTokenSymbol={channel.token.symbol}
                 variant="primary"
               />
             </div>
           </div>
         </div>
       </div>
-      <ChannelStreams channelId={channelId} />
+      <ChannelStreams channelId={channel._id} handle={handle} />
     </div>
   );
 };

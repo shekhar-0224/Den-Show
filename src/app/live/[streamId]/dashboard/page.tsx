@@ -1,4 +1,4 @@
-import WatchWrapper from "~/app/_components/common/WatchWrapper";
+// import WatchWrapper from "~/app/_components/common/WatchWrapper";
 // tRPC removed - using dummy data instead
 
 export default async function StreamDashboard({

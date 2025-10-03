@@ -22,7 +22,7 @@ export const channelRouter = createTRPCRouter({
       const channels = await ctx.db.query.channelDetails.findMany({
         where: or(
           ilike(channelDetails.name, `%${input.query}%`),
-          ilike(channelDetails.handle, `%${input.query}%`),
+          ilike(channelDetails.handle, `%${input.query}%`)
         ),
         orderBy: desc(channelDetails.createdAt),
         columns: {
@@ -53,7 +53,7 @@ export const channelRouter = createTRPCRouter({
     .input(
       z.object({
         handle: z.string(),
-      }),
+      })
     )
     .query(async ({ ctx, input }) => {
       const details = await ctx.db.query.channelDetails.findFirst({
@@ -113,7 +113,7 @@ export const channelRouter = createTRPCRouter({
         .innerJoin(streamMetrics, eq(streamDetails.id, streamMetrics.streamId))
         .innerJoin(
           channelDetails,
-          eq(streamDetails.channelId, channelDetails.id),
+          eq(streamDetails.channelId, channelDetails.id)
         )
         .where(eq(streamDetails.channelId, input.channelId))
         .orderBy(desc(streamDetails.createdAt));
@@ -137,7 +137,7 @@ export const channelRouter = createTRPCRouter({
           address: z.string().optional(),
           symbol: z.string(),
         }),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const {
@@ -234,7 +234,7 @@ export const channelRouter = createTRPCRouter({
         });
 
         await createAndSetToken({
-          address: ctx.user.address,
+          address: ctx.user.address as `0x${string}`,
           userId: ctx.user.userId,
           username: ctx.user.username,
           channelId: channel.id,

@@ -209,3 +209,31 @@ export const updateStreamByAssetId = internalMutation({
     });
   },
 });
+
+export const getStreamsByChannel = query({
+  args: {
+    channelId: v.id("channels"),
+  },
+  handler: async (ctx, args) => {
+    const streams = await ctx.db
+      .query("streams")
+      .withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
+      .order("desc")
+      .collect();
+
+    const data = await Promise.all(
+      streams.map(async (stream) => {
+        const thumbnailPicUrl = stream.thumbnailPicId
+          ? await ctx.storage.getUrl(stream.thumbnailPicId)
+          : null;
+
+        return {
+          ...stream,
+          thumbnailPicUrl,
+        };
+      })
+    );
+
+    return data;
+  },
+});

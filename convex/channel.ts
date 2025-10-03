@@ -182,7 +182,17 @@ export const getChannelByHandle = query({
       return null;
     }
 
-    return channel;
+    const profilePicUrl = channel.profilePicId
+      ? await ctx.storage.getUrl(channel.profilePicId)
+      : null;
+
+    const bannerPicUrl = channel.bannerPicId
+      ? await ctx.storage.getUrl(channel.bannerPicId)
+      : null;
+
+    const user = await ctx.db.get(channel.userId);
+
+    return { ...channel, profilePicUrl, bannerPicUrl, user };
   },
 });
 

@@ -1,7 +1,7 @@
 import { usePrivy } from "@privy-io/react-auth";
 import { useQuery } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
 import { Button } from "~/components/ui/button";
+import { api } from "../../../../convex/_generated/api";
 
 export const Logout = () => {
   const gg = useQuery(api.user.getCurrentUser);
@@ -12,7 +12,7 @@ export const Logout = () => {
   return (
     <Button
       onClick={logout}
-      variant="outline"
+      variant="neutral"
       size="sm"
       className="flex items-center gap-2 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
     >
