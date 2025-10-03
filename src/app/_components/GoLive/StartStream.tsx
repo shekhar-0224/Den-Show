@@ -4,9 +4,10 @@ import { useMutation } from "convex/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
@@ -39,7 +40,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     fansOnly: boolean;
     audioOnly: boolean;
     clippingAllowed: boolean;
-    tags: string;
+    categories: string[];
   }>({
     streamTitle: "",
     thumbnail: null,
@@ -47,11 +48,34 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     fansOnly: false,
     audioOnly: false,
     clippingAllowed: false,
-    tags: "",
+    categories: [],
   });
 
   const [isScheduling, setIsScheduling] = useState(false);
   const [showScheduledPopup, setShowScheduledPopup] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+
+  const categories = [
+    "Gaming",
+    "Entertainment", 
+    "Education",
+    "Technology"
+  ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+        setShowCategoryDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   const [scheduleData, setScheduleData] = useState({
     date: "",
     time: "",
@@ -138,6 +162,15 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     if (file) setFormData({ ...formData, thumbnail: file });
   };
 
+  const handleCategoryToggle = (category: string) => {
+    setFormData(prev => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter(c => c !== category)
+        : [...prev.categories, category]
+    }));
+  };
+
   const startLivestreamHandler = async (
     e?: React.FormEvent<HTMLFormElement>
   ) => {
@@ -156,10 +189,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     const newStreamId = await createStream({
       title: formData.streamTitle,
       description: formData.description,
-      tags: formData.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0),
+      tags: formData.categories,
       thumbnailPicId: thumbnailUrl,
       accessType: formData.fansOnly ? "fans" : "everyone",
       allowClipping: formData.clippingAllowed,
@@ -264,29 +294,38 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="uppercase text-xs" htmlFor="tags">
-                Tags
+              <label className="uppercase text-xs" htmlFor="categories">
+                Category
               </label>
-              <div className="relative w-[229px]">
+              <div className="relative w-[229px]" ref={categoryDropdownRef}>
                 <Input
-                  id="tags"
-                  placeholder="Choose Tags"
-                  className="text-sm py-6 pr-10 w-full"
-                  value={formData.tags}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      tags: e.target.value,
-                    })
-                  }
+                  id="categories"
+                  placeholder="Pick channel category"
+                  className="text-sm py-6 pr-10 w-full cursor-pointer"
+                  value={formData.categories.length > 0 ? formData.categories.join(", ") : ""}
+                  readOnly
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                 />
-                <Image
-                  src="/icons/chevron-right.svg"
-                  alt="Dropdown"
-                  width={9}
-                  height={14}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 rotate-90"
-                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="flex flex-col">
+                    <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-b-[4px] border-l-transparent border-r-transparent border-b-black"></div>
+                    <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-l-transparent border-r-transparent border-t-black -mt-1"></div>
+                  </div>
+                </div>
+                
+                {showCategoryDropdown && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-black rounded-b-lg shadow-lg z-50 w-full">
+                    {categories.map((category, index) => (
+                      <div key={category} className="flex items-center justify-between px-3 py-2 border-b border-black last:border-b-0">
+                        <span className="text-sm text-black">{category}</span>
+                        <Checkbox
+                          checked={formData.categories.includes(category)}
+                          onCheckedChange={() => handleCategoryToggle(category)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 // tRPC removed - using dummy data instead
 
 export default async function MyDen() {
-  const channel = await // Dummy API call: api.channel.getMyChannel();
+  // Dummy API call - using dummy data instead
+  const channel = null; // Simulate no channel found
 
   if (!channel) redirect("/");
   else redirect(`/${channel.handle}`);
