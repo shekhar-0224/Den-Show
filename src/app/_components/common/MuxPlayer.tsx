@@ -18,7 +18,6 @@ const MuxPlayerComponent = ({
     <div className={className}>
       <MuxPlayer
         playbackId={playbackId}
-        streamType="live"
         metadata={{
           video_title: title,
           video_id: streamId,
