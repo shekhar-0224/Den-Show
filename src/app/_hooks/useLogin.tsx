@@ -16,6 +16,15 @@ export default function useLogin() {
       loginAccount,
       wasAlreadyAuthenticated,
     }) => {
+      console.log("------------------------------");
+      console.log({
+        isNewUser,
+        loginMethod,
+        loginAccount,
+        wasAlreadyAuthenticated,
+      });
+      console.log("------------------------------");
+
       try {
         if (isNewUser)
           posthog.capture("sign-up", { loginMethod, loginAccount });

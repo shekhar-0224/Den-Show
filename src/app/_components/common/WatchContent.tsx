@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useMobile } from "~/app/_hooks/useMobile";
-import CreatorTokenStats from "../LiveStream/CreatorTokenStats";
 import SideDrawer from "../LiveStream/SideDrawer";
 import StreamDetails from "../LiveStream/StreamDetails";
 import HlsPlayer from "./HlsPlayer";
@@ -37,9 +36,8 @@ const WatchContent = (props: WatchProps) => {
                 />
               </div>
             ) : (
-              <LiveStreamRenderer 
-                streamId={props.streamId} 
-                isDemo={true}
+              <LiveStreamRenderer
+                streamId={props.streamId}
                 demoPlaybackId={props.demoPlaybackId}
               />
             )}

@@ -9,7 +9,6 @@ import { useCallback, useMemo } from "react";
 import { base } from "viem/chains";
 import { http } from "wagmi";
 import { env } from "~/env";
-import { TRPCReactProvider } from "~/trpc/react";
 
 export const config = createConfig({
   chains: [base],
@@ -44,30 +43,29 @@ const convex = new ConvexReactClient(env.NEXT_PUBLIC_CONVEX_URL);
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <TRPCReactProvider>
-      <PrivyProvider
-        appId={env.NEXT_PUBLIC_PRIVY_APP_ID}
-        config={{
-          defaultChain: base,
-          supportedChains: [base],
-          embeddedWallets: {
-            ethereum: {
-              createOnLogin: "all-users",
-            },
+    <PrivyProvider
+      appId={env.NEXT_PUBLIC_PRIVY_APP_ID}
+      clientId="client-WY6PdM9NtdPknzqvsTpgXDSTyrqs3XgyyHRxZhuMH5URR"
+      config={{
+        defaultChain: base,
+        supportedChains: [base],
+        embeddedWallets: {
+          ethereum: {
+            createOnLogin: "all-users",
           },
-        }}
-      >
-        <ConvexProviderWithAuth client={convex} useAuth={useAuthFromPrivy}>
-          <OnchainKitProvider
-            apiKey={env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-            chain={base}
-          >
-            <QueryClientProvider client={queryClient}>
-              <WagmiProvider config={config}>{children}</WagmiProvider>
-            </QueryClientProvider>
-          </OnchainKitProvider>
-        </ConvexProviderWithAuth>
-      </PrivyProvider>
-    </TRPCReactProvider>
+        },
+      }}
+    >
+      <ConvexProviderWithAuth client={convex} useAuth={useAuthFromPrivy}>
+        <OnchainKitProvider
+          apiKey={env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+          chain={base}
+        >
+          <QueryClientProvider client={queryClient}>
+            <WagmiProvider config={config}>{children}</WagmiProvider>
+          </QueryClientProvider>
+        </OnchainKitProvider>
+      </ConvexProviderWithAuth>
+    </PrivyProvider>
   );
 }

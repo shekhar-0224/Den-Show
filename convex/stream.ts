@@ -138,7 +138,7 @@ export const createStream = mutation({
       args.scheduledStartTime - Date.now() < 5 * 60 * 1000
     ) {
       await ctx.scheduler.runAfter(0, internal.mux.changeLiveStreamState, {
-        muxStreamId: creds.streamId,
+        muxStreamId: creds.muxStreamId,
         state: "enable",
       });
 
@@ -146,7 +146,7 @@ export const createStream = mutation({
         Date.now() + 15 * 60 * 1000, // 15 minutes later
         internal.mux.changeLiveStreamState,
         {
-          muxStreamId: creds.streamId,
+          muxStreamId: creds.muxStreamId,
           state: "disable",
         }
       );
@@ -155,7 +155,7 @@ export const createStream = mutation({
         args.scheduledStartTime - 5 * 60 * 1000, // 5 minutes before
         internal.mux.changeLiveStreamState,
         {
-          muxStreamId: creds.streamId,
+          muxStreamId: creds.muxStreamId,
           state: "enable",
         }
       );
@@ -174,7 +174,7 @@ export const createStream = mutation({
         args.scheduledStartTime + 15 * 60 * 1000,
         internal.mux.changeLiveStreamState,
         {
-          muxStreamId: creds.streamId,
+          muxStreamId: creds.muxStreamId,
           state: "disable",
         }
       );
@@ -200,5 +200,17 @@ export const updateStreamStatus = internalMutation({
       state: args.newState,
       lastUpdatedAt: Date.now(),
     });
+  },
+});
+
+export const getStreamFromStreamKey = query({
+  args: {
+    streamId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const creds = await ctx.db
+      .query("channelCreds")
+      .withIndex("by_muxStreamId", (q) => q.eq("muxStreamId", args.streamId))
+      .first();
   },
 });

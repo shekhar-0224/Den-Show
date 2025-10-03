@@ -104,8 +104,8 @@ export const createChannelCreds = internalMutation({
   handler: async (ctx, args) => {
     await ctx.db.insert("channelCreds", {
       channelId: args.channelId,
-      streamId: args.streamId,
-      streamKey: args.streamKey,
+      muxStreamId: args.streamId,
+      muxStreamKey: args.streamKey,
     });
   },
 });
