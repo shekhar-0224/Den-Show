@@ -71,6 +71,7 @@ export const createChannel = mutation({
       nsfw: args.nsfw,
       language: args.language ?? "en",
       token: args.token,
+      playbackId: "",
     });
 
     await ctx.scheduler.runAfter(0, internal.mux.createMuxStreamKey, {
@@ -98,14 +99,19 @@ export const createChannel = mutation({
 export const createChannelCreds = internalMutation({
   args: {
     channelId: v.id("channels"),
-    streamId: v.string(),
-    streamKey: v.string(),
+    muxStreamId: v.string(),
+    muxStreamKey: v.string(),
+    playbackId: v.string(),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("channelCreds", {
       channelId: args.channelId,
-      muxStreamId: args.streamId,
-      muxStreamKey: args.streamKey,
+      muxStreamId: args.muxStreamId,
+      muxStreamKey: args.muxStreamKey,
+    });
+
+    await ctx.db.patch(args.channelId, {
+      playbackId: args.playbackId,
     });
   },
 });

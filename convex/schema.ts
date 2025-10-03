@@ -39,6 +39,7 @@ export default defineSchema({
       symbol: v.string(),
       source: v.union(v.literal("other"), v.literal("clanker")),
     }),
+    playbackId: v.string(),
   })
     .index("by_handle", ["handle"])
     .index("by_userId", ["userId"])
@@ -68,12 +69,19 @@ export default defineSchema({
     allowClipping: v.boolean(),
     state: streamStates,
     scheduledStartTime: v.optional(v.number()),
-    playbackId: v.optional(v.string()), // TODO update this
+    playbackId: v.optional(v.string()),
+    assetId: v.optional(v.string()),
     lastUpdatedAt: v.number(),
   })
     .index("by_channelId", ["channelId"])
     .index("by_userId", ["userId"])
-    .index("by_state_lastUpdatedAt", ["state", "lastUpdatedAt"]),
+    .index("by_state_lastUpdatedAt", ["state", "lastUpdatedAt"])
+    .index("by_channelId_state_lastUpdatedAt", [
+      "channelId",
+      "state",
+      "lastUpdatedAt",
+    ])
+    .index("by_assetId", ["assetId"]),
 
   streamViewEvents: defineTable({
     streamId: v.id("streams"),

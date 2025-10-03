@@ -42,13 +42,12 @@ const WatchContent = ({
               title={streamData.stream.title}
               streamId={streamData.stream._id}
               playbackId={
-                streamData.stream.playbackId ??
-                "DS00Spx1CV902MCtPj5WknGlR102V5HFkDe"
-              } // TODO: replace hardcorded value
+                streamData.stream.playbackId ?? streamData.channel.playbackId
+              }
             />
           </div>
 
-          <StreamDetails streamId={streamData.stream._id} />
+          {/* <StreamDetails streamId={streamData.stream._id} /> */}
         </div>
       </motion.div>
       <SideDrawer

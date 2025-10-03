@@ -138,27 +138,74 @@ export const createStream = mutation({
 
 export const updateStreamStatus = internalMutation({
   args: {
-    streamId: v.id("streams"),
+    muxStreamId: v.string(),
     newState: streamStates,
+    assetId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const stream = await ctx.db.get(args.streamId);
+    const creds = await ctx.db
+      .query("channelCreds")
+      .withIndex("by_muxStreamId", (q) => q.eq("muxStreamId", args.muxStreamId))
+      .first();
 
-    if (!stream) {
-      throw new Error("Stream not found");
+    if (!creds) {
+      return;
     }
 
-    await ctx.db.patch(args.streamId, {
-      state: args.newState,
-      lastUpdatedAt: Date.now(),
-    });
+    const stream =
+      args.newState === "live"
+        ? await ctx.db
+            .query("streams")
+            .withIndex("by_channelId_state_lastUpdatedAt", (q) =>
+              q.eq("channelId", creds.channelId).eq("state", "pending")
+            )
+            .order("desc")
+            .first()
+        : await ctx.db
+            .query("streams")
+            .withIndex("by_channelId_state_lastUpdatedAt", (q) =>
+              q.eq("channelId", creds.channelId).eq("state", "live")
+            )
+            .order("desc")
+            .first();
+
+    if (!stream) {
+      return;
+    }
+
+    if (args.assetId)
+      await ctx.db.patch(stream._id, {
+        state: args.newState,
+        assetId: args.assetId,
+        lastUpdatedAt: Date.now(),
+      });
+    else
+      await ctx.db.patch(stream._id, {
+        state: args.newState,
+        lastUpdatedAt: Date.now(),
+      });
   },
 });
 
-export const updatePlaybackId = internalMutation({
+export const updateStreamByAssetId = internalMutation({
   args: {
-    streamId: v.id("streams"),
+    assetId: v.string(),
     playbackId: v.string(),
   },
-  handler: async (ctx, args) => {},
+  handler: async (ctx, args) => {
+    const stream = await ctx.db
+      .query("streams")
+      .withIndex("by_assetId", (q) => q.eq("assetId", args.assetId))
+      .first();
+
+    if (!stream) {
+      console.warn("No stream found for assetId", args.assetId);
+      return;
+    }
+
+    await ctx.db.patch(stream._id, {
+      playbackId: args.playbackId,
+      lastUpdatedAt: Date.now(),
+    });
+  },
 });
