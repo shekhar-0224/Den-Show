@@ -1,10 +1,13 @@
 "use client";
 
+import { useMutation } from "convex/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
@@ -14,7 +17,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { uploadFile } from "~/lib/utils";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
+import { useFileUpload } from "../../_hooks/useFileUpload";
+
 // import { api } from "~/trpc/react";
 
 interface StartStreamProps {
@@ -24,6 +30,9 @@ interface StartStreamProps {
 const StartStream = ({ onStartStream }: StartStreamProps) => {
   const router = useRouter();
 
+  const createStream = useMutation(api.stream.createStream);
+  const { mutateAsync: uploadFile } = useFileUpload();
+
   const [formData, setFormData] = useState<{
     streamTitle: string;
     thumbnail: File | null;
@@ -31,7 +40,7 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     fansOnly: boolean;
     audioOnly: boolean;
     clippingAllowed: boolean;
-    tags: string;
+    categories: string[];
   }>({
     streamTitle: "",
     thumbnail: null,
@@ -39,11 +48,32 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     fansOnly: false,
     audioOnly: false,
     clippingAllowed: false,
-    tags: "",
+    categories: [],
   });
 
   const [isScheduling, setIsScheduling] = useState(false);
   const [showScheduledPopup, setShowScheduledPopup] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+
+  const categories = ["Gaming", "Entertainment", "Education", "Technology"];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowCategoryDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const [scheduleData, setScheduleData] = useState({
     date: "",
     time: "",
@@ -52,11 +82,15 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState({ hour: 7, minute: 0, period: 'AM' });
+  const [selectedTime, setSelectedTime] = useState({
+    hour: 7,
+    minute: 0,
+    period: "AM",
+  });
 
   const formatDate = (date: Date) => {
     const day = date.getDate();
-    const month = date.toLocaleString('default', { month: 'long' });
+    const month = date.toLocaleString("default", { month: "long" });
     const year = date.getFullYear();
     return `${day} ${month}, ${year}`;
   };
@@ -68,19 +102,19 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-    
+
     const days = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }
-    
+
     return days;
   };
 
@@ -93,10 +127,10 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     setShowDatePicker(false);
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentMonth(prev => {
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentMonth((prev) => {
       const newMonth = new Date(prev);
-      if (direction === 'prev') {
+      if (direction === "prev") {
         newMonth.setMonth(prev.getMonth() - 1);
       } else {
         newMonth.setMonth(prev.getMonth() + 1);
@@ -105,26 +139,18 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     });
   };
 
-  const handleTimeSelect = (hour: number, minute: number, period: 'AM' | 'PM') => {
+  const handleTimeSelect = (
+    hour: number,
+    minute: number,
+    period: "AM" | "PM"
+  ) => {
     setSelectedTime({ hour, minute, period });
-    const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}${period}`;
+    const formattedTime = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}${period}`;
     setScheduleData({
       ...scheduleData,
       time: formattedTime,
     });
     setShowTimePicker(false);
-  };
-
-  // Dummy function for starting stream
-  const startStream = async (data: any) => {
-    console.log("Dummy startStream called with:", data);
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsStartingStream(false);
-    toast.success("Stream started successfully");
-    onStartStream();
-    router.push(`/live/dummy-stream-id/dashboard`);
   };
 
   const [isStartingStream, setIsStartingStream] = useState(false);
@@ -134,188 +160,224 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
     if (file) setFormData({ ...formData, thumbnail: file });
   };
 
+  const handleCategoryToggle = (category: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter((c) => c !== category)
+        : [...prev.categories, category],
+    }));
+  };
+
   const startLivestreamHandler = async (
-    e?: React.FormEvent<HTMLFormElement>,
+    e?: React.FormEvent<HTMLFormElement>
   ) => {
     if (e) {
-    e.preventDefault();
+      e.preventDefault();
     }
 
     setIsStartingStream(true);
 
-    let thumbnailUrl: string | undefined = undefined;
+    let thumbnailUrl: Id<"_storage"> | undefined;
 
     if (formData.thumbnail) {
       thumbnailUrl = await uploadFile(formData.thumbnail);
     }
 
-    await startStream({
+    const newStreamId = await createStream({
       title: formData.streamTitle,
       description: formData.description,
-      categories: [],
-      accessType: formData.fansOnly ? "Fan Only" : "Open to All",
-      thumbnailUrl,
-      clippingAllowed: formData.clippingAllowed,
+      tags: formData.categories,
+      thumbnailPicId: thumbnailUrl,
+      accessType: formData.fansOnly ? "fans" : "everyone",
+      allowClipping: formData.clippingAllowed,
+      scheduledStartTime: selectedDate?.getTime(),
     });
+
+    setIsStartingStream(false);
+    toast.success("Stream started successfully");
+    onStartStream();
+    router.push(`/live/${newStreamId}`);
   };
 
   const isButtonDisabled =
     !formData.streamTitle || !formData.description || isStartingStream;
-  const isScheduleButtonDisabled = isButtonDisabled || !scheduleData.date || !scheduleData.time;
+  const isScheduleButtonDisabled =
+    isButtonDisabled || !scheduleData.date || !scheduleData.time;
 
   return (
     <div className="p-4">
       {!showScheduledPopup && (
         <>
-      <div className="text-lg font-cream-medium">Go Live</div>
-      <form
-        className="mt-6 flex flex-col gap-8"
-        onSubmit={startLivestreamHandler}
-      >
-        <div className="flex flex-col gap-2">
-          <label className="uppercase text-xs" htmlFor="channel-name">
-            Stream Title
-          </label>
-          <Input
-            id="channel-name"
-            placeholder="Enter title here"
-            className="text-sm py-6 shadow-small"
-            value={formData.streamTitle}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                streamTitle: e.target.value,
-              })
-            }
-          />
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="w-[229px] flex flex-col gap-2">
-            <label className="uppercase text-xs" htmlFor="thumbnail">
-              Thumbnail
-            </label>
-            {formData.thumbnail ? (
-              <Image
-                src={URL.createObjectURL(formData.thumbnail)}
-                alt="Thumbnail"
-                width={229}
-                height={100}
-                className="object-cover cursor-pointer h-fit w-full aspect-auto"
-                onClick={() =>
-                  document.getElementById("thumbnail-input")?.click()
+          <div className="text-lg font-cream-medium">Go Live</div>
+          <form
+            className="mt-6 flex flex-col gap-8"
+            onSubmit={startLivestreamHandler}
+          >
+            <div className="flex flex-col gap-2">
+              <label className="uppercase text-xs" htmlFor="channel-name">
+                Stream Title
+              </label>
+              <Input
+                id="channel-name"
+                placeholder="Enter title here"
+                className="text-sm py-6 shadow-small"
+                value={formData.streamTitle}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    streamTitle: e.target.value,
+                  })
                 }
-                style={{
-                  width: "100%",
-                  height: "100px",
-                  objectFit: "cover",
-                }}
               />
-            ) : (
-              <div
-                onClick={() =>
-                  document.getElementById("thumbnail-input")?.click()
-                }
-                className="text-sm font-normal underline underline-offset-2 border-2 border-dashed border-border rounded-md p-4 flex items-center justify-center cursor-pointer w-full h-[100px]"
-              >
-                Choose Thumbnail
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="w-[229px] flex flex-col gap-2">
+                <label className="uppercase text-xs" htmlFor="thumbnail">
+                  Thumbnail
+                </label>
+                {formData.thumbnail ? (
+                  <Image
+                    src={URL.createObjectURL(formData.thumbnail)}
+                    alt="Thumbnail"
+                    width={229}
+                    height={100}
+                    className="object-cover cursor-pointer h-fit w-full aspect-auto"
+                    onClick={() =>
+                      document.getElementById("thumbnail-input")?.click()
+                    }
+                    style={{
+                      width: "100%",
+                      height: "100px",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <div
+                    onClick={() =>
+                      document.getElementById("thumbnail-input")?.click()
+                    }
+                    className="text-sm font-normal underline underline-offset-2 border-2 border-dashed border-border rounded-md p-4 flex items-center justify-center cursor-pointer w-full h-[100px]"
+                  >
+                    Choose Thumbnail
+                  </div>
+                )}
+                <input
+                  id="thumbnail-input"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleThumbnailChange}
+                />
               </div>
-            )}
-            <input
-              id="thumbnail-input"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleThumbnailChange}
-            />
-          </div>
 
-          <div className="flex-1 flex flex-col gap-2">
-            <label className="uppercase text-xs" htmlFor="stream-desc">
-              Description (if any)
-            </label>
-            <Textarea
-              id="stream-desc"
-              className="text-sm h-[100px]"
-              placeholder="Write about your stream here"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  description: e.target.value,
-                })
-              }
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="uppercase text-xs" htmlFor="tags">
-            Tags
-          </label>
-          <div className="relative w-[229px]">
-            <Input
-              id="tags"
-              placeholder="Choose Tags"
-              className="text-sm py-6 pr-10 w-full"
-              value={formData.tags}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  tags: e.target.value,
-                })
-              }
-            />
-            <Image
-              src="/icons/chevron-right.svg"
-              alt="Dropdown"
-              width={9}
-              height={14}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 rotate-90"
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="uppercase text-xs" htmlFor="channel-name">
-            Audience
-          </label>
-          <div className="flex items-center gap-[30px] sm:gap-8 md:gap-10 lg:gap-[70px]">
-            <div className="flex items-center space-x-3">
-              <Switch
-                id="fans-only"
-                checked={formData.fansOnly}
-                onCheckedChange={(checked) =>
-                  setFormData({
-                    ...formData,
-                    fansOnly: checked,
-                  })
-                }
-              />
-              <Label htmlFor="fans-only" className="font-normal text-sm">
-                Open to <span className="font-semibold">FANS</span> only
-              </Label>
+              <div className="flex-1 flex flex-col gap-2">
+                <label className="uppercase text-xs" htmlFor="stream-desc">
+                  Description (if any)
+                </label>
+                <Textarea
+                  id="stream-desc"
+                  className="text-sm h-[100px]"
+                  placeholder="Write about your stream here"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      description: e.target.value,
+                    })
+                  }
+                />
+              </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <Switch
-                id="clipping-allowed"
-                checked={formData.clippingAllowed}
-                onCheckedChange={(checked) =>
-                  setFormData({
-                    ...formData,
-                    clippingAllowed: checked,
-                  })
-                }
-              />
-              <Label htmlFor="clipping-allowed" className="font-normal text-sm">
-                This stream is for <span className="font-semibold">18+ audience only</span>
-              </Label>
-            </div>
-          </div>
-        </div>
+            <div className="flex flex-col gap-2">
+              <label className="uppercase text-xs" htmlFor="categories">
+                Category
+              </label>
+              <div className="relative w-[229px]" ref={categoryDropdownRef}>
+                <Input
+                  id="categories"
+                  placeholder="Pick channel category"
+                  className="text-sm py-6 pr-10 w-full cursor-pointer shadow-small"
+                  value={
+                    formData.categories.length > 0
+                      ? formData.categories.join(", ")
+                      : ""
+                  }
+                  readOnly
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="flex flex-col">
+                    <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-b-[4px] border-l-transparent border-r-transparent border-b-black"></div>
+                    <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-l-transparent border-r-transparent border-t-black -mt-1"></div>
+                  </div>
+                </div>
 
-        {/* <div className="flex flex-col gap-2">
+                {showCategoryDropdown && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-black shadow-small z-50 w-full">
+                    {categories.map((category, index) => (
+                      <div
+                        key={category}
+                        className="flex items-center justify-between px-3 py-2 border-b border-black last:border-b-0"
+                      >
+                        <span className="text-sm text-black">{category}</span>
+                        <Checkbox
+                          checked={formData.categories.includes(category)}
+                          onCheckedChange={() => handleCategoryToggle(category)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="uppercase text-xs" htmlFor="channel-name">
+                Audience
+              </label>
+              <div className="flex items-center gap-[30px] sm:gap-8 md:gap-10 lg:gap-[70px]">
+                <div className="flex items-center space-x-3">
+                  <Switch
+                    id="fans-only"
+                    checked={formData.fansOnly}
+                    onCheckedChange={(checked) =>
+                      setFormData({
+                        ...formData,
+                        fansOnly: checked,
+                      })
+                    }
+                  />
+                  <Label htmlFor="fans-only" className="font-normal text-sm">
+                    Open to <span className="font-semibold">FANS</span> only
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <Switch
+                    id="clipping-allowed"
+                    checked={formData.clippingAllowed}
+                    onCheckedChange={(checked) =>
+                      setFormData({
+                        ...formData,
+                        clippingAllowed: checked,
+                      })
+                    }
+                  />
+                  <Label
+                    htmlFor="clipping-allowed"
+                    className="font-normal text-sm"
+                  >
+                    This stream is for{" "}
+                    <span className="font-semibold">18+ audience only</span>
+                  </Label>
+                </div>
+              </div>
+            </div>
+
+            {/* <div className="flex flex-col gap-2">
           <label className="uppercase text-xs" htmlFor="audio-only">
             Audio-Only Mode
           </label>
@@ -336,206 +398,257 @@ const StartStream = ({ onStartStream }: StartStreamProps) => {
           </div>
         </div> */}
 
-        {!isScheduling ? (
-          <div className="flex items-center justify-center gap-4">
-            <Button disabled={isButtonDisabled} className="w-[238px] px-8" type="submit">
-            {isStartingStream ? "Starting..." : "Go Live Now"}
-          </Button>
-            <span className="text-xs text-[#454343]">
-              or <span 
-                className="underline font-cream-medium cursor-pointer"
-                onClick={() => setIsScheduling(true)}
-              >
-            Schedule for Later
-              </span>
-            </span>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-6">
-            <div className="text-sm font-cream-regular">Schedule for Later</div>
-            
-            <div className="flex items-center gap-4">
-              <div className="flex-1 flex flex-col gap-2">
-                <label className="uppercase text-xs" htmlFor="schedule-date">
-                  Enter Date
-                </label>
-                <div className="relative">
-                  <Input
-                    id="schedule-date"
-                    placeholder="DD/MM/YYYY"
-                    className="text-sm py-6 pr-10 w-full shadow-small"
-                    value={scheduleData.date}
-                    readOnly
-                    onClick={() => setShowDatePicker(!showDatePicker)}
-                  />
-                  <Image
-                    src="/icons/calendar.svg"
-                    alt="Calendar"
-                    width={16}
-                    height={16}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                    onClick={() => setShowDatePicker(!showDatePicker)}
-                  />
-                  
-                  {showDatePicker && (
-                    <div className="absolute bottom-full left-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-large z-50 w-64 p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <button
-                          onClick={() => navigateMonth('prev')}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          ‹
-                        </button>
-                        <span className="font-medium">
-                          {currentMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                        </span>
-                        <button
-                          onClick={() => navigateMonth('next')}
-                          className="text-gray-600 hover:text-gray-800"
-                        >
-                          ›
-                        </button>
-                      </div>
-                      
-                      <div className="grid grid-cols-7 gap-1 mb-2">
-                        {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(day => (
-                          <div key={day} className="text-xs font-medium text-center py-1">
-                            {day}
+            {!isScheduling ? (
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  disabled={isButtonDisabled}
+                  className="w-[238px] px-8"
+                  type="submit"
+                >
+                  {isStartingStream ? "Starting..." : "Go Live Now"}
+                </Button>
+                <span className="text-xs text-[#454343]">
+                  or{" "}
+                  <span
+                    className="underline font-cream-medium cursor-pointer"
+                    onClick={() => setIsScheduling(true)}
+                  >
+                    Schedule for Later
+                  </span>
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-6">
+                <div className="text-sm font-cream-regular">
+                  Schedule for Later
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 flex flex-col gap-2">
+                    <label
+                      className="uppercase text-xs"
+                      htmlFor="schedule-date"
+                    >
+                      Enter Date
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="schedule-date"
+                        placeholder="DD/MM/YYYY"
+                        className="text-sm py-6 pr-10 w-full shadow-small"
+                        value={scheduleData.date}
+                        readOnly
+                        onClick={() => setShowDatePicker(!showDatePicker)}
+                      />
+                      <Image
+                        src="/icons/calendar.svg"
+                        alt="Calendar"
+                        width={16}
+                        height={16}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                        onClick={() => setShowDatePicker(!showDatePicker)}
+                      />
+
+                      {showDatePicker && (
+                        <div className="absolute bottom-full left-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-large z-50 w-64 p-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <button
+                              onClick={() => navigateMonth("prev")}
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              ‹
+                            </button>
+                            <span className="font-medium">
+                              {currentMonth.toLocaleDateString("en-US", {
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </span>
+                            <button
+                              onClick={() => navigateMonth("next")}
+                              className="text-gray-600 hover:text-gray-800"
+                            >
+                              ›
+                            </button>
                           </div>
-                        ))}
-                      </div>
-                      
-                      <div className="grid grid-cols-7 gap-1">
-                        {getDaysInMonth(currentMonth).map((day, index) => (
-                          <div key={index} className="text-center">
-                            {day ? (
+
+                          <div className="grid grid-cols-7 gap-1 mb-2">
+                            {[
+                              "SUN",
+                              "MON",
+                              "TUE",
+                              "WED",
+                              "THU",
+                              "FRI",
+                              "SAT",
+                            ].map((day) => (
+                              <div
+                                key={day}
+                                className="text-xs font-medium text-center py-1"
+                              >
+                                {day}
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="grid grid-cols-7 gap-1">
+                            {getDaysInMonth(currentMonth).map((day) => (
+                              <div key={day?.getDate()} className="text-center">
+                                {day ? (
+                                  <button
+                                    onClick={() => handleDateSelect(day)}
+                                    className={`w-8 h-8 text-sm rounded hover:bg-gray-100 ${
+                                      selectedDate &&
+                                      day.getTime() === selectedDate.getTime()
+                                        ? "bg-black text-white"
+                                        : "text-gray-700"
+                                    }`}
+                                  >
+                                    {day.getDate()}
+                                  </button>
+                                ) : (
+                                  <div className="w-8 h-8" />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 flex flex-col gap-2">
+                    <label
+                      className="uppercase text-xs"
+                      htmlFor="schedule-time"
+                    >
+                      Time
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="schedule-time"
+                        placeholder="HH:MM"
+                        className="text-sm py-6 pr-10 w-full shadow-small"
+                        value={scheduleData.time}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const timeWithPeriod = value + selectedTime.period;
+                          setScheduleData({
+                            ...scheduleData,
+                            time: timeWithPeriod,
+                          });
+                          // Parse the time and update selectedTime
+                          const timeMatch = value.match(/^(\d{1,2}):(\d{2})$/);
+                          if (timeMatch) {
+                            const hour = parseInt(timeMatch[1]!);
+                            const minute = parseInt(timeMatch[2]!);
+                            if (
+                              hour >= 1 &&
+                              hour <= 12 &&
+                              minute >= 0 &&
+                              minute <= 59
+                            ) {
+                              setSelectedTime({
+                                hour: hour,
+                                minute: minute,
+                                period: selectedTime.period,
+                              });
+                            }
+                          }
+                        }}
+                        onFocus={() => setShowTimePicker(true)}
+                      />
+                      <Image
+                        src="/icons/clock.svg"
+                        alt="Clock"
+                        width={16}
+                        height={16}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                        onClick={() => setShowTimePicker(!showTimePicker)}
+                      />
+
+                      {showTimePicker && (
+                        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-large z-50 w-full p-4">
+                          <div className="flex items-center justify-center mb-4">
+                            <div className="text-3xl font-bold">
+                              <span className="underline">
+                                {selectedTime.hour.toString().padStart(2, "0")}
+                              </span>
+                              <span className="mx-2">:</span>
+                              <span>
+                                {selectedTime.minute
+                                  .toString()
+                                  .padStart(2, "0")}
+                              </span>
+                            </div>
+                            <div className="flex flex-col gap-1 ml-4">
                               <button
-                                onClick={() => handleDateSelect(day)}
-                                className={`w-8 h-8 text-sm rounded hover:bg-gray-100 ${
-                                  selectedDate && day.getTime() === selectedDate.getTime()
-                                    ? 'bg-black text-white'
-                                    : 'text-gray-700'
+                                onClick={() =>
+                                  handleTimeSelect(
+                                    selectedTime.hour,
+                                    selectedTime.minute,
+                                    "AM"
+                                  )
+                                }
+                                className={`px-3 py-1 text-sm rounded ${
+                                  selectedTime.period === "AM"
+                                    ? "bg-black text-white"
+                                    : "text-black hover:bg-gray-100"
                                 }`}
                               >
-                                {day.getDate()}
+                                AM
                               </button>
-                            ) : (
-                              <div className="w-8 h-8" />
-                            )}
+                              <button
+                                onClick={() =>
+                                  handleTimeSelect(
+                                    selectedTime.hour,
+                                    selectedTime.minute,
+                                    "PM"
+                                  )
+                                }
+                                className={`px-3 py-1 text-sm rounded ${
+                                  selectedTime.period === "PM"
+                                    ? "bg-black text-white"
+                                    : "text-black hover:bg-gray-100"
+                                }`}
+                              >
+                                PM
+                              </button>
+                            </div>
                           </div>
-                        ))}
-                      </div>
+
+                          <div className="text-xs text-gray-500 text-center">
+                            The time is in your local timezone
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <span
+                    className="text-sm text-[#454343] underline font-cream-medium cursor-pointer"
+                    onClick={() => setIsScheduling(false)}
+                  >
+                    or Go Live Now
+                  </span>
+                  <div className="flex justify-center">
+                    <Button
+                      disabled={isScheduleButtonDisabled}
+                      className="w-[238px] px-8"
+                      type="button"
+                      onClick={() => {
+                        setShowScheduledPopup(true);
+                      }}
+                    >
+                      {isStartingStream ? "Scheduling..." : "Schedule Now"}
+                    </Button>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex-1 flex flex-col gap-2">
-                <label className="uppercase text-xs" htmlFor="schedule-time">
-                  Time
-                </label>
-                <div className="relative">
-                  <Input
-                    id="schedule-time"
-                    placeholder="HH:MM"
-                    className="text-sm py-6 pr-10 w-full shadow-small"
-                    value={scheduleData.time}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      const timeWithPeriod = value + selectedTime.period;
-                      setScheduleData({
-                        ...scheduleData,
-                        time: timeWithPeriod,
-                      });
-                      // Parse the time and update selectedTime
-                      const timeMatch = value.match(/^(\d{1,2}):(\d{2})$/);
-                      if (timeMatch) {
-                        const hour = parseInt(timeMatch[1]!);
-                        const minute = parseInt(timeMatch[2]!);
-                        if (hour >= 1 && hour <= 12 && minute >= 0 && minute <= 59) {
-                          setSelectedTime({
-                            hour: hour,
-                            minute: minute,
-                            period: selectedTime.period
-                          });
-                        }
-                      }
-                    }}
-                    onFocus={() => setShowTimePicker(true)}
-                  />
-                  <Image
-                    src="/icons/clock.svg"
-                    alt="Clock"
-                    width={16}
-                    height={16}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                    onClick={() => setShowTimePicker(!showTimePicker)}
-                  />
-                  
-                  {showTimePicker && (
-                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-large z-50 w-full p-4">
-                      <div className="flex items-center justify-center mb-4">
-                        <div className="text-3xl font-bold">
-                          <span className="underline">{selectedTime.hour.toString().padStart(2, '0')}</span>
-                          <span className="mx-2">:</span>
-                          <span>{selectedTime.minute.toString().padStart(2, '0')}</span>
-                        </div>
-                        <div className="flex flex-col gap-1 ml-4">
-                          <button
-                            onClick={() => handleTimeSelect(selectedTime.hour, selectedTime.minute, 'AM')}
-                            className={`px-3 py-1 text-sm rounded ${
-                              selectedTime.period === 'AM' 
-                                ? 'bg-black text-white' 
-                                : 'text-black hover:bg-gray-100'
-                            }`}
-                          >
-                            AM
-                          </button>
-                          <button
-                            onClick={() => handleTimeSelect(selectedTime.hour, selectedTime.minute, 'PM')}
-                            className={`px-3 py-1 text-sm rounded ${
-                              selectedTime.period === 'PM' 
-                                ? 'bg-black text-white' 
-                                : 'text-black hover:bg-gray-100'
-                            }`}
-                          >
-                            PM
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div className="text-xs text-gray-500 text-center">
-                        The time is in your local timezone
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <span 
-                className="text-sm text-[#454343] underline font-cream-medium cursor-pointer"
-                onClick={() => setIsScheduling(false)}
-              >
-                or Go Live Now
-              </span>
-              <div className="flex justify-center">
-                <Button 
-                  disabled={isScheduleButtonDisabled} 
-                  className="w-[238px] px-8" 
-                  type="button"
-                  onClick={() => {
-                    setShowScheduledPopup(true);
-                  }}
-                >
-                  {isStartingStream ? "Scheduling..." : "Schedule Now"}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </form>
+            )}
+          </form>
         </>
       )}
 

@@ -37,8 +37,9 @@ export default defineSchema({
     token: v.object({
       address: v.string(),
       symbol: v.string(),
-      source: v.union(v.literal("zora"), v.literal("clanker")),
+      source: v.union(v.literal("other"), v.literal("clanker")),
     }),
+    playbackId: v.string(),
   })
     .index("by_handle", ["handle"])
     .index("by_userId", ["userId"])
@@ -51,9 +52,11 @@ export default defineSchema({
 
   channelCreds: defineTable({
     channelId: v.id("channels"),
-    streamId: v.string(),
-    streamKey: v.string(),
-  }).index("by_channelId", ["channelId"]),
+    muxStreamId: v.string(),
+    muxStreamKey: v.string(),
+  })
+    .index("by_channelId", ["channelId"])
+    .index("by_muxStreamId", ["muxStreamId"]),
 
   streams: defineTable({
     channelId: v.id("channels"),
@@ -66,10 +69,23 @@ export default defineSchema({
     allowClipping: v.boolean(),
     state: streamStates,
     scheduledStartTime: v.optional(v.number()),
-    playbackId: v.optional(v.string()), // TODO update this
+    playbackId: v.optional(v.string()),
+    assetId: v.optional(v.string()),
     lastUpdatedAt: v.number(),
   })
     .index("by_channelId", ["channelId"])
     .index("by_userId", ["userId"])
-    .index("by_state_lastUpdatedAt", ["state", "lastUpdatedAt"]),
+    .index("by_state_lastUpdatedAt", ["state", "lastUpdatedAt"])
+    .index("by_channelId_state_lastUpdatedAt", [
+      "channelId",
+      "state",
+      "lastUpdatedAt",
+    ])
+    .index("by_assetId", ["assetId"]),
+
+  streamViewEvents: defineTable({
+    streamId: v.id("streams"),
+    viewerId: v.id("users"),
+    channelId: v.id("channels"),
+  }),
 });

@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React from "react";
 import { useMobile } from "~/app/_hooks/useMobile";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
@@ -30,7 +29,7 @@ const ChannelCircle = ({
       onClick={() => router.push(`/${handle}`)}
       className={cn(
         "group relative rounded-full border border-black w-[118.75px] h-[118.75px] flex items-center justify-center overflow-hidden cursor-pointer",
-        isMobile && "w-[60px] h-[60px]",
+        isMobile && "w-[60px] h-[60px]"
       )}
     >
       <motion.div
@@ -41,7 +40,10 @@ const ChannelCircle = ({
           damping: 12,
           bounce: 0.1,
         }}
-        className={cn("w-[120.75px] h-[120.75px]", isMobile && "w-[60px] h-[60px]")}
+        className={cn(
+          "w-[120.75px] h-[120.75px]",
+          isMobile && "w-[60px] h-[60px]"
+        )}
       >
         <Image
           src={profileUrl ?? "/images/default-channel-logo.png"}

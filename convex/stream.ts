@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { streamStates } from "./schema";
 import { getUserFromCtx } from "./utils/users";
@@ -133,70 +132,108 @@ export const createStream = mutation({
       lastUpdatedAt: Date.now(),
     });
 
-    if (
-      !args.scheduledStartTime ||
-      args.scheduledStartTime - Date.now() < 5 * 60 * 1000
-    ) {
-      await ctx.scheduler.runAfter(0, internal.mux.changeLiveStreamState, {
-        muxStreamId: creds.streamId,
-        state: "enable",
-      });
-
-      await ctx.scheduler.runAt(
-        Date.now() + 15 * 60 * 1000, // 15 minutes later
-        internal.mux.changeLiveStreamState,
-        {
-          muxStreamId: creds.streamId,
-          state: "disable",
-        }
-      );
-    } else {
-      await ctx.scheduler.runAt(
-        args.scheduledStartTime - 5 * 60 * 1000, // 5 minutes before
-        internal.mux.changeLiveStreamState,
-        {
-          muxStreamId: creds.streamId,
-          state: "enable",
-        }
-      );
-
-      await ctx.scheduler.runAt(
-        args.scheduledStartTime - 5 * 60 * 1000, // 5 minutes before
-        internal.stream.updateStreamStatus,
-        {
-          streamId: newStreamId,
-          newState: "pending",
-        }
-      );
-
-      // Disable after 15mins
-      await ctx.scheduler.runAt(
-        args.scheduledStartTime + 15 * 60 * 1000,
-        internal.mux.changeLiveStreamState,
-        {
-          muxStreamId: creds.streamId,
-          state: "disable",
-        }
-      );
-    }
+    return newStreamId;
   },
 });
 
 export const updateStreamStatus = internalMutation({
   args: {
-    streamId: v.id("streams"),
+    muxStreamId: v.string(),
     newState: streamStates,
+    assetId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const stream = await ctx.db.get(args.streamId);
+    const creds = await ctx.db
+      .query("channelCreds")
+      .withIndex("by_muxStreamId", (q) => q.eq("muxStreamId", args.muxStreamId))
+      .first();
 
-    if (!stream) {
-      throw new Error("Stream not found");
+    if (!creds) {
+      return;
     }
 
-    await ctx.db.patch(args.streamId, {
-      state: args.newState,
+    const stream =
+      args.newState === "live"
+        ? await ctx.db
+            .query("streams")
+            .withIndex("by_channelId_state_lastUpdatedAt", (q) =>
+              q.eq("channelId", creds.channelId).eq("state", "pending")
+            )
+            .order("desc")
+            .first()
+        : await ctx.db
+            .query("streams")
+            .withIndex("by_channelId_state_lastUpdatedAt", (q) =>
+              q.eq("channelId", creds.channelId).eq("state", "live")
+            )
+            .order("desc")
+            .first();
+
+    if (!stream) {
+      return;
+    }
+
+    if (args.assetId)
+      await ctx.db.patch(stream._id, {
+        state: args.newState,
+        assetId: args.assetId,
+        lastUpdatedAt: Date.now(),
+      });
+    else
+      await ctx.db.patch(stream._id, {
+        state: args.newState,
+        lastUpdatedAt: Date.now(),
+      });
+  },
+});
+
+export const updateStreamByAssetId = internalMutation({
+  args: {
+    assetId: v.string(),
+    playbackId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const stream = await ctx.db
+      .query("streams")
+      .withIndex("by_assetId", (q) => q.eq("assetId", args.assetId))
+      .first();
+
+    if (!stream) {
+      console.warn("No stream found for assetId", args.assetId);
+      return;
+    }
+
+    await ctx.db.patch(stream._id, {
+      playbackId: args.playbackId,
       lastUpdatedAt: Date.now(),
     });
+  },
+});
+
+export const getStreamsByChannel = query({
+  args: {
+    channelId: v.id("channels"),
+  },
+  handler: async (ctx, args) => {
+    const streams = await ctx.db
+      .query("streams")
+      .withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
+      .order("desc")
+      .collect();
+
+    const data = await Promise.all(
+      streams.map(async (stream) => {
+        const thumbnailPicUrl = stream.thumbnailPicId
+          ? await ctx.storage.getUrl(stream.thumbnailPicId)
+          : null;
+
+        return {
+          ...stream,
+          thumbnailPicUrl,
+        };
+      })
+    );
+
+    return data;
   },
 });

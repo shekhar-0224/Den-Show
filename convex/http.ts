@@ -10,7 +10,7 @@ http.route({
   path: createPath("/webhook/mux"),
   method: "POST",
   handler: httpAction(async (ctx, req) => {
-    const headers = req.headers;
+    const headers = Object.fromEntries(req.headers);
     const body = await req.text();
 
     await ctx.runAction(internal.mux.handleWebhook, { headers, body });

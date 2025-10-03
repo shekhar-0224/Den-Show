@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
-import { api } from "~/trpc/react";
+// tRPC removed - using dummy data instead
 import TipStreamerPopover from "./TipStreamerPopover";
 
 interface SendTipTriggerProps {
@@ -39,9 +39,8 @@ const SendTipTrigger = ({
 }: SendTipTriggerProps) => {
   const { address } = useAddress();
   const { login } = useLogin();
-  const { data: user } = api.user.me.useQuery(undefined, {
-    enabled: !!address,
-  });
+  // Dummy user data
+  const user = { id: "mock-user", username: "mock-username" };
 
   if (!address || !user)
     return (

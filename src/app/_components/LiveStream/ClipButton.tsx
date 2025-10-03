@@ -13,7 +13,7 @@ import {
 import useAddress from "~/app/_hooks/useAddress";
 import useLogin from "~/app/_hooks/useLogin";
 import { Input } from "~/components/ui/input";
-import { api } from "~/trpc/react";
+// tRPC removed  using dummy data instead
 import ClippableHlsPlayer from "../common/ClippableHlsPlayer";
 import EditorPlayer from "../common/EditorPlayer";
 
@@ -29,18 +29,22 @@ const ClipButton = ({ streamId, hlsUrl }: ClipButtonProps) => {
 
   const [title, setTitle] = useState("");
 
-  const { mutateAsync: createClip } = api.clips.createClipMizan.useMutation({
-    onSuccess: () => {
-      toast.success("Clip created and can be viewed on your profile");
-      setIsDialogOpen(false);
-      // Reset form
-      setTitle("");
-    },
-    onError: (error) => {
-      toast.error("Failed to create clip");
-      console.error("Failed to create clip:", error);
-    },
-  });
+  // Dummy clip creation function
+  const createClip = async (data: {
+    streamId: string;
+    absEnd: number;
+    absStart: number;
+    title: string;
+    thumbnailUrl: string;
+  }) => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    console.log("Dummy clip created:", data);
+    toast.success("Clip created and can be viewed on your profile");
+    setIsDialogOpen(false);
+    setTitle("");
+  };
 
   const captureCurrentFrame = (): string | null => {
     const video = document.querySelector("video") as HTMLVideoElement;

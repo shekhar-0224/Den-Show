@@ -5,29 +5,27 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
-import { api } from "~/trpc/react";
 
 const LiveStreamControls = ({ streamId }: { streamId: string }) => {
   const router = useRouter();
 
-  const { mutateAsync: endStream } = api.stream.endStream.useMutation({
-    onSuccess: () => {
+  // Dummy end stream function
+  const endStream = async () => {
+    try {
+      console.log("Dummy stream ended:", streamId);
       toast.success("Stream ended successfully");
       router.push("/");
-    },
-  });
-
-  const endStreamHandler = async () => {
-    await endStream({
-      streamId,
-    });
+    } catch (error) {
+      toast.error("Failed to end stream");
+      console.error("Failed to end stream:", error);
+    }
   };
 
   return (
     <div className="flex items-center gap-4 mt-4">
       <Button
         variant="inverted"
-        onClick={endStreamHandler}
+        onClick={endStream}
         className="h-fit flex flex-col items-center gap-2 cursor-pointer bg-[#B84944] text-white"
       >
         <Image

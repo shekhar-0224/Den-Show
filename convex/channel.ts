@@ -3,6 +3,23 @@ import { internal } from "./_generated/api";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { getUserFromCtx } from "./utils/users";
 
+export const updateTokenAddress = internalMutation({
+  args: {
+    channelId: v.id("channels"),
+    address: v.string(),
+    symbol: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.channelId, {
+      token: {
+        address: args.address,
+        symbol: args.symbol,
+        source: "clanker",
+      },
+    });
+  },
+});
+
 export const createChannel = mutation({
   args: {
     name: v.string(),
@@ -16,8 +33,9 @@ export const createChannel = mutation({
     token: v.object({
       address: v.string(),
       symbol: v.string(),
-      source: v.union(v.literal("zora"), v.literal("clanker")),
+      source: v.union(v.literal("other"), v.literal("clanker")),
     }),
+    creatorAddress: v.string(),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromCtx(ctx);
@@ -53,25 +71,47 @@ export const createChannel = mutation({
       nsfw: args.nsfw,
       language: args.language ?? "en",
       token: args.token,
+      playbackId: "",
     });
 
     await ctx.scheduler.runAfter(0, internal.mux.createMuxStreamKey, {
       channelId,
     });
+
+    // TODO: update this default URL
+    const profilePicUrl = args.profilePicId
+      ? ((await ctx.storage.getUrl(args.profilePicId)) ??
+        "https://den-lilac.vercel.app/images/default-channel-logo.png")
+      : "https://den-lilac.vercel.app/images/default-channel-logo.png";
+
+    if (args.token.source === "clanker") {
+      await ctx.scheduler.runAfter(0, internal.token.deployToken, {
+        creatorAddress: args.creatorAddress,
+        ticker: args.token.symbol,
+        channelId,
+        channelName: args.name,
+        profilePicUrl,
+      });
+    }
   },
 });
 
 export const createChannelCreds = internalMutation({
   args: {
     channelId: v.id("channels"),
-    streamId: v.string(),
-    streamKey: v.string(),
+    muxStreamId: v.string(),
+    muxStreamKey: v.string(),
+    playbackId: v.string(),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("channelCreds", {
       channelId: args.channelId,
-      streamId: args.streamId,
-      streamKey: args.streamKey,
+      muxStreamId: args.muxStreamId,
+      muxStreamKey: args.muxStreamKey,
+    });
+
+    await ctx.db.patch(args.channelId, {
+      playbackId: args.playbackId,
     });
   },
 });
@@ -81,7 +121,7 @@ export const getMyChannel = query({
     const user = await getUserFromCtx(ctx);
 
     if (!user) {
-      throw new Error("Not authenticated");
+      return null;
     }
 
     const channel = await ctx.db
@@ -89,7 +129,42 @@ export const getMyChannel = query({
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .first();
 
-    return channel ?? null;
+    if (!channel) {
+      return null;
+    }
+
+    const creds = await ctx.db
+      .query("channelCreds")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channel._id))
+      .first();
+
+    return { ...channel, creds };
+  },
+});
+
+export const getMyStreamingCreds = query({
+  handler: async (ctx) => {
+    const user = await getUserFromCtx(ctx);
+
+    if (!user) {
+      return null;
+    }
+
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .first();
+
+    if (!channel) {
+      return null;
+    }
+
+    const creds = await ctx.db
+      .query("channelCreds")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channel._id))
+      .first();
+
+    return creds;
   },
 });
 
@@ -107,7 +182,17 @@ export const getChannelByHandle = query({
       return null;
     }
 
-    return channel;
+    const profilePicUrl = channel.profilePicId
+      ? await ctx.storage.getUrl(channel.profilePicId)
+      : null;
+
+    const bannerPicUrl = channel.bannerPicId
+      ? await ctx.storage.getUrl(channel.bannerPicId)
+      : null;
+
+    const user = await ctx.db.get(channel.userId);
+
+    return { ...channel, profilePicUrl, bannerPicUrl, user };
   },
 });
 
@@ -141,5 +226,24 @@ export const searchChannel = query({
     }
 
     return Array.from(channelMap.values());
+  },
+});
+
+export const getTrendingChannels = query({
+  handler: async (ctx) => {
+    const channels = await ctx.db.query("channels").order("desc").take(10);
+
+    return await Promise.all(
+      channels.map(async (channel) => {
+        const profilePicUrl = channel.profilePicId
+          ? await ctx.storage.getUrl(channel.profilePicId)
+          : null;
+
+        return {
+          ...channel,
+          profilePicUrl,
+        };
+      })
+    );
   },
 });

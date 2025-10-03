@@ -1,46 +1,15 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import Image from "next/image";
-import React, { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { api } from "../../../../convex/_generated/api";
 import ChannelCircle, { ChannelCircleSkeleton } from "../common/ChannelCircle";
 
 const TrendingChannels = () => {
-  // Dummy data for trending channels
-  const channels = [
-    {
-      channelId: "channel1",
-      name: "TechGuru",
-      handle: "techguru",
-      profileUrl: "/images/default-channel-logo.png",
-      isLive: true,
-      viewers: 1234
-    },
-    {
-      channelId: "channel2",
-      name: "ChefMaster",
-      handle: "chefmaster", 
-      profileUrl: "/images/default-channel-logo.png",
-      isLive: false,
-      viewers: 0
-    },
-    {
-      channelId: "channel3",
-      name: "GamePro",
-      handle: "gamepro",
-      profileUrl: "/images/default-channel-logo.png",
-      isLive: true,
-      viewers: 567
-    },
-    {
-      channelId: "channel4",
-      name: "ArtMaster",
-      handle: "artmaster",
-      profileUrl: "/images/default-channel-logo.png",
-      isLive: false,
-      viewers: 0
-    }
-  ];
-  const isLoading = false;
+  const trendingChannels = useQuery(api.channel.getTrendingChannels);
+
+  const isLoading = trendingChannels === undefined;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,15 +44,15 @@ const TrendingChannels = () => {
       scrollContainer.removeEventListener("mouseleave", handleMouseLeave);
       scrollContainer.removeEventListener("wheel", handleWheel);
     };
-  }, [channels]);
+  }, []);
 
   return (
     <div className="px-4 md:px-0 md:pl-6 mt-10">
       <div className="flex items-center justify-between md:pr-6">
         <div className="flex items-center gap-1">
-        <span className="text-black font-semibold text-xl font-chromate tracking-tighter">
-              Channels{" "}
-            </span>
+          <span className="text-black font-semibold text-xl font-chromate tracking-tighter">
+            Channels{" "}
+          </span>
           <span className="text-xl font-semibold">Trending Now</span>
           <Image
             src="/icons/trending.svg"
@@ -104,11 +73,12 @@ const TrendingChannels = () => {
       </div>
       {isLoading ? (
         <div className="w-full flex mt-2 flex-wrap gap-4">
-          {Array.from({ length: 11 }, (_, index) => (
+          {Array.from({ length: 5 }, (_, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: this is fine here, data will not change
             <ChannelCircleSkeleton key={index} />
           ))}
         </div>
-      ) : channels && channels.length > 0 ? (
+      ) : trendingChannels.length > 0 ? (
         <div
           ref={scrollContainerRef}
           className="w-full flex overflow-x-scroll overflow-y-visible mt-2 flex-wrap gap-4"
@@ -116,12 +86,12 @@ const TrendingChannels = () => {
             scrollbarWidth: "none",
           }}
         >
-          {channels.map((channel) => (
+          {trendingChannels.map((channel) => (
             <ChannelCircle
-              key={channel.channelId}
-              id={channel.channelId}
+              key={channel._id}
+              id={channel._id}
               handle={channel.handle}
-              profileUrl={channel.profileUrl}
+              profileUrl={channel.profilePicUrl}
               name={channel.name}
             />
           ))}
