@@ -37,7 +37,11 @@ const WatchContent = (props: WatchProps) => {
                 />
               </div>
             ) : (
-              <LiveStreamRenderer streamId={props.streamId} />
+              <LiveStreamRenderer 
+                streamId={props.streamId} 
+                isDemo={true}
+                demoPlaybackId={props.demoPlaybackId}
+              />
             )}
           </div>
 

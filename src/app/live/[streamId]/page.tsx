@@ -9,10 +9,26 @@ export default async function LiveStream({
 }) {
   const streamId = (await params).streamId;
 
-  const { streamTitle, streamDescription, channel, isMyStream } =
-    await api.stream.getStreamInfo({
-      streamId,
-    });
+  const { streamTitle, streamDescription, channel, isMyStream, demoPlaybackId } = {
+    streamTitle: "Ishan Live Stream",
+    streamDescription: "Join xyz",
+    demoPlaybackId: "DS00Spx1CV902MCtPj5WknGlR102V5HFkDe",
+    channel: {
+      id: "ishan",
+      bio: "Welcome",
+      profileUrl: "/images/default-pfp.png",
+      name: "New Streamer",
+      handle: "demostreamer",
+      createdAt: new Date("2024-01-01"),
+      creatorTokenSymbol: "DEMO",
+      creatorTokenAddress: "0x1234567890abcdef",
+      user: {
+        id: "ishan",
+        denWalletAddress: "0xabcdef1234567890",
+      },
+    },
+    isMyStream: false,
+  };
 
   if (isMyStream) return redirect(`/live/${streamId}/dashboard`);
 
@@ -22,6 +38,7 @@ export default async function LiveStream({
       streamId={streamId}
       streamTitle={streamTitle}
       streamDescription={streamDescription ?? undefined}
+      demoPlaybackId={demoPlaybackId}
       isDashboard={false}
       type="live"
     />

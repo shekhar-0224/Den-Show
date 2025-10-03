@@ -15,6 +15,7 @@ export interface WatchProps {
   streamDescription?: string;
   streamUrl?: string;
   streamKey?: string;
+  demoPlaybackId?: string;
   channel: {
     name: string;
     profileUrl: string | null;
