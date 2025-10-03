@@ -133,53 +133,6 @@ export const createStream = mutation({
       lastUpdatedAt: Date.now(),
     });
 
-    if (
-      !args.scheduledStartTime ||
-      args.scheduledStartTime - Date.now() < 5 * 60 * 1000
-    ) {
-      await ctx.scheduler.runAfter(0, internal.mux.changeLiveStreamState, {
-        muxStreamId: creds.muxStreamId,
-        state: "enable",
-      });
-
-      await ctx.scheduler.runAt(
-        Date.now() + 15 * 60 * 1000, // 15 minutes later
-        internal.mux.changeLiveStreamState,
-        {
-          muxStreamId: creds.muxStreamId,
-          state: "disable",
-        }
-      );
-    } else {
-      await ctx.scheduler.runAt(
-        args.scheduledStartTime - 5 * 60 * 1000, // 5 minutes before
-        internal.mux.changeLiveStreamState,
-        {
-          muxStreamId: creds.muxStreamId,
-          state: "enable",
-        }
-      );
-
-      await ctx.scheduler.runAt(
-        args.scheduledStartTime - 5 * 60 * 1000, // 5 minutes before
-        internal.stream.updateStreamStatus,
-        {
-          streamId: newStreamId,
-          newState: "pending",
-        }
-      );
-
-      // Disable after 15mins
-      await ctx.scheduler.runAt(
-        args.scheduledStartTime + 15 * 60 * 1000,
-        internal.mux.changeLiveStreamState,
-        {
-          muxStreamId: creds.muxStreamId,
-          state: "disable",
-        }
-      );
-    }
-
     return newStreamId;
   },
 });
