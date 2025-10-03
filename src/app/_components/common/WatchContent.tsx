@@ -8,6 +8,7 @@ import { api } from "../../../../convex/_generated/api";
 import SideDrawer from "../LiveStream/SideDrawer";
 import StreamDetails from "../LiveStream/StreamDetails";
 import MuxPlayerComponent from "./MuxPlayer";
+import { StreamProvider, type StreamData } from "./StreamContext";
 
 const WatchContent = ({
   preLoadedStream,
@@ -24,8 +25,40 @@ const WatchContent = ({
 
   const isMyStream = streamData.channel._id === myChannel?._id;
 
+  // Debug logging to show viewer vs streamer
+  console.log("WatchContent - isMyStream:", isMyStream);
+  console.log("WatchContent - Channel ID:", streamData.channel._id);
+  console.log("WatchContent - My Channel ID:", myChannel?._id);
+  console.log("WatchContent - View Type:", isMyStream ? "STREAMER VIEW" : "VIEWER VIEW");
+
+  // Create streamData object for StreamContext
+  const contextStreamData: StreamData = {
+    streamId: streamData.stream._id,
+    streamTitle: streamData.stream.title,
+    streamDescription: streamData.stream.description,
+    streamUrl: undefined, // Not available for Mux streams
+    streamKey: undefined, // Not available for Mux streams
+    demoPlaybackId: streamData.stream.playbackId ?? streamData.channel.playbackId,
+    isDashboard: isMyStream, // Use isMyStream to determine if this is the streamer's view
+    type: "live",
+    channel: {
+      name: streamData.channel.name,
+      profileUrl: streamData.channel.profilePicUrl,
+      handle: streamData.channel.handle,
+      bio: streamData.channel.bio,
+      id: streamData.channel._id,
+      createdAt: streamData.channel._creationTime,
+      creatorTokenSymbol: streamData.channel.token.symbol,
+      creatorTokenAddress: streamData.channel.token.address,
+      user: {
+        denWalletAddress: "", // This might need to be fetched separately
+      },
+    },
+  };
+
   return (
-    <div className="bg-black text-white h-full p-4 flex flex-col md:flex-row gap-4 overflow-hidden">
+    <StreamProvider streamData={contextStreamData}>
+      <div className="bg-black text-white h-full p-4 flex flex-col md:flex-row gap-4 overflow-hidden">
       <motion.div
         className="flex-1 overflow-scroll"
         animate={{
@@ -47,7 +80,7 @@ const WatchContent = ({
             />
           </div>
 
-          {/* <StreamDetails streamId={streamData.stream._id} /> */}
+          <StreamDetails />
         </div>
       </motion.div>
       <SideDrawer
@@ -58,7 +91,8 @@ const WatchContent = ({
         creatorTokenAddress={streamData.channel.token.address}
         type="live"
       />
-    </div>
+      </div>
+    </StreamProvider>
   );
 };
 
