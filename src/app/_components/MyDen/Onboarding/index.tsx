@@ -1,13 +1,13 @@
 import { useWallets } from "@privy-io/react-auth";
 import { Label } from "@radix-ui/react-label";
+import { revalidateLogic, useForm, useStore } from "@tanstack/react-form";
 import { useMutation as useCvxMutation } from "convex/react";
-import { useForm } from "@tanstack/react-form";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
-import { useCreateChannelAtom } from "~/app/_atoms/createChannel.atom";
+import z from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -69,110 +69,98 @@ interface FormValues {
   banner: File | null;
 }
 
-interface TokenData {
-  address: string;
-  symbol: string;
-}
-
-const Onboarding = ({ onOnboardingComplete, onShowVerification }: OnboardingProps) => {
+const Onboarding = ({
+  onOnboardingComplete,
+  onShowVerification,
+}: OnboardingProps) => {
   const { wallets } = useWallets();
   const embedWallet = wallets?.find((w) => w.connectorType === "embedded");
-  const [step, setStep] = useState<"details" | "tier" | "verification">("details");
+  const [step, setStep] = useState<"details" | "tier" | "verification">(
+    "details"
+  );
   const { mutateAsync } = useFileUpload();
   const createChannel = useCvxMutation(api.channel.createChannel);
   const router = useRouter();
-  const [formData, setFormData] = useCreateChannelAtom();
   const [isCreatingChannel, setIsCreatingChannel] = useState(false);
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        channelName: z.string().min(1, "Channel name is required").max(50),
+        channelHandle: z
+          .string()
+          .min(1, "Channel handle is required")
+          .max(30, "Channel handle too long"),
+        channelAbout: z
+          .string()
+          .min(1, "Channel description is required")
+          .max(160),
+        nsfw: z.boolean(),
+        tncAccepted: z.boolean("You must accept the terms and conditions"),
+        language: z.string().min(2, "Language is required").max(100),
+        fanSubscriptionFee: z.number().min(0),
+        token: z.object({
+          isClanker: z.boolean(),
+          address: z.string().max(100),
+          symbol: z.string().min(1, "Token symbol is required").max(10),
+        }),
+        pfp: z.instanceof(File).nullable(),
+        banner: z.instanceof(File).nullable(),
+      }),
+    []
+  );
 
   // Initialize form with proper default values
   const form = useForm({
     defaultValues: {
-      channelName: formData.channelName || "",
-      channelHandle: formData.channelHandle || "",
-      channelAbout: formData.channelAbout || "",
-      nsfw: formData.nsfw || false,
-      tncAccepted: formData.tncAccepted || false,
-      language: formData.language || "English",
-      fanSubscriptionFee: formData.fanSubscriptionFee || 0,
+      channelName: "",
+      channelHandle: "",
+      channelAbout: "",
+      nsfw: false,
+      tncAccepted: false,
+      language: "English",
+      fanSubscriptionFee: 0,
       token: {
-        isClanker: formData.token.isClanker || false,
-        address: formData.token.address || "",
-        symbol: formData.token.symbol || "",
+        isClanker: false,
+        address: "",
+        symbol: "",
       },
-      pfp: formData.pfp || null,
-      banner: formData.banner || null,
+      pfp: null as File | null,
+      banner: null as File | null,
     },
+    validationLogic: revalidateLogic(),
     validators: {
-      onChange: ({ value }: { value: FormValues }) => {
-        const errors: string[] = [];
-        
-        if (!value.channelName?.trim()) {
-          errors.push("Channel name is required");
-        }
-        if (!value.channelHandle?.trim()) {
-          errors.push("Channel handle is required");
-        }
-        if (!value.channelAbout?.trim()) {
-          errors.push("Channel description is required");
-        }
-        if (!value.tncAccepted) {
-          errors.push("You must accept the terms and conditions");
-        }
-        if (!value.token.symbol?.trim()) {
-          errors.push("Token symbol is required");
-        }
-        if (!value.token.isClanker && !value.token.address?.trim()) {
-          errors.push("Token address is required when not using Clanker");
-        }
-        
-        return errors.length > 0 ? errors : undefined;
-      },
+      onDynamic: schema,
     },
     onSubmit: async ({ value }) => {
       await handleFormSubmit(value);
     },
   });
 
-  // Sync form data with atom
-  useEffect(() => {
-    const subscription = form.store.subscribe(() => {
-      const values = form.state.values;
-      setFormData({
-        ...formData,
-        channelName: values.channelName,
-        channelHandle: values.channelHandle,
-        channelAbout: values.channelAbout,
-        nsfw: values.nsfw,
-        tncAccepted: values.tncAccepted,
-        language: values.language,
-        fanSubscriptionFee: values.fanSubscriptionFee,
-        token: {
-          isClanker: values.token.isClanker,
-          address: values.token.address,
-          symbol: values.token.symbol,
-        },
-        pfp: values.pfp,
-        banner: values.banner,
-      });
-    });
-    return () => subscription();
-  }, [form, setFormData, formData]);
+  const handlePFPChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        form.setFieldValue("pfp", file);
+      }
+    },
+    [form]
+  );
 
-  const handlePFPChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      form.setFieldValue("pfp", file);
-    }
-  }, [form]);
+  const handleBannerChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        form.setFieldValue("banner", file);
+      }
+    },
+    [form]
+  );
 
-  const handleBannerChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      form.setFieldValue("banner", file);
-    }
-  }, [form]);
-
-  const [debouncedHandle] = useDebounceValue(form.state.values.channelHandle, 500);
+  const [debouncedHandle] = useDebounceValue(
+    form.state.values.channelHandle,
+    500
+  );
 
   // Handle availability check
   const isHandleAvailable = useMemo(() => {
@@ -185,12 +173,19 @@ const Onboarding = ({ onOnboardingComplete, onShowVerification }: OnboardingProp
 
   // Form validation state
   const isFormValid = useMemo(() => {
-    return form.state.isValid && 
-           form.state.canSubmit && 
-           !isLoadingHandleAvailable && 
-           isHandleAvailable &&
-           !RESERVED_HANDLES.includes(form.state.values.channelHandle.toLowerCase());
-  }, [form.state.isValid, form.state.canSubmit, isLoadingHandleAvailable, isHandleAvailable, form.state.values.channelHandle]);
+    return (
+      form.state.isValid &&
+      form.state.canSubmit &&
+      !isLoadingHandleAvailable &&
+      isHandleAvailable &&
+      !RESERVED_HANDLES.includes(form.state.values.channelHandle.toLowerCase())
+    );
+  }, [
+    form.state.isValid,
+    form.state.canSubmit,
+    isHandleAvailable,
+    form.state.values.channelHandle,
+  ]);
 
   const handleCreateDen = async (values: FormValues) => {
     if (!embedWallet?.address) {
@@ -265,6 +260,11 @@ const Onboarding = ({ onOnboardingComplete, onShowVerification }: OnboardingProp
     }
   };
 
+  const reactiveIsClanker = useStore(
+    form.store,
+    (state) => state.values.token.isClanker
+  );
+
   return (
     <div className="p-4">
       {step === "details" && (
@@ -278,386 +278,392 @@ const Onboarding = ({ onOnboardingComplete, onShowVerification }: OnboardingProp
           }}
           className="w-full max-w-[580px] mx-auto"
         >
-        <div className="w-full relative">
-          <div
-            className={cn(
-              "cursor-pointer w-full relative h-[120px]",
-              !form.state.values.banner && "bg-primary"
-            )}
-            onClick={() => document.getElementById("cover-input")?.click()}
-          >
-            {form.state.values.banner ? (
-              <Image
-                src={URL.createObjectURL(form.state.values.banner)}
-                alt="Cover"
-                width={0}
-                height={0}
-                sizes="100vw"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <Image
-                src="/images/pfp-input.png"
-                alt="Cover Input"
-                width={40}
-                height={45}
-                className="absolute top-6 right-6"
-              />
-            )}
-            <input
-              id="cover-input"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleBannerChange}
-            />
-          </div>
-          <div
-            className="cursor-pointer absolute -bottom-6 left-1/2 -translate-x-1/2 w-20 h-20 flex items-center justify-center rounded-full group"
-            onClick={() => document.getElementById("pfp-input")?.click()}
-          >
-            {form.state.values.pfp ? (
-              <Image
-                src={URL.createObjectURL(form.state.values.pfp)}
-                alt="PFP"
-                width={80}
-                height={80}
-                className="rounded-full w-20 h-20 object-cover group-hover:brightness-50"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center group-hover:bg-gray-800 transition-colors">
+          <div className="w-full relative">
+            <div
+              className={cn(
+                "cursor-pointer w-full relative h-[120px]",
+                !form.state.values.banner && "bg-primary"
+              )}
+              onClick={() => document.getElementById("cover-input")?.click()}
+            >
+              {form.state.values.banner ? (
+                <Image
+                  src={URL.createObjectURL(form.state.values.banner)}
+                  alt="Cover"
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
                 <Image
                   src="/images/pfp-input.png"
-                  alt="Upload Image"
-                  width={36}
-                  height={40}
-                  className="opacity-100 group-hover:opacity-80"
-                />
-              </div>
-            )}
-            <input
-              id="pfp-input"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handlePFPChange}
-            />
-          </div>
-        </div>
-
-        <div className="mt-6 px-4">
-          <div className="flex items-start gap-3">
-            <div className="flex flex-1 flex-col gap-2">
-              <label className="uppercase text-xs" htmlFor="channel-name">
-                Channel Name
-              </label>
-              <form.Field
-                name="channelName"
-                validators={{
-                  onChange: ({ value }) =>
-                    !value?.trim() ? "Channel name is required" : undefined,
-                }}
-              >
-                {(field) => (
-                  <>
-                    <Input
-                      maxLength={30}
-                      id="channel-name"
-                      placeholder="@mizanxali's Den"
-                      className="text-sm h-10 shadow-small"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                    />
-                    {field.state.meta.errors.length > 0 && (
-                      <div className="text-red-500 text-xs mt-1">
-                        {field.state.meta.errors[0]}
-                      </div>
-                    )}
-                  </>
-                )}
-              </form.Field>
-            </div>
-
-            <div className="flex flex-1 flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <label className="uppercase text-xs" htmlFor="symbol">
-                  Channel Token Ticker
-                </label>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Image
-                      src="/icons/info.svg"
-                      alt="Info"
-                      width={16}
-                      height={16}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Search for any token - Zora, Clanker, anything.</p>
-                    <p>
-                      This will be your permanent Channel ticker. You won't be
-                      able to change it later.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              {form.state.values.token.isClanker ? (
-                <div className="flex rounded-base items-stretch shadow-small">
-                  <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
-                    $
-                  </div>
-                  <form.Field
-                    name="token.symbol"
-                    validators={{
-                      onChange: ({ value }) =>
-                        !value?.trim() ? "Token symbol is required" : undefined,
-                    }}
-                  >
-                    {(field) => (
-                      <>
-                        <Input
-                          maxLength={10}
-                          className="flex-1 outline-none text-sm px-2.5 h-10 border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                          id="symbol"
-                          placeholder="BTC"
-                          value={field.state.value}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          onBlur={field.handleBlur}
-                        />
-                        {field.state.meta.errors.length > 0 && (
-                          <div className="text-red-500 text-xs mt-1">
-                            {field.state.meta.errors[0]}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </form.Field>
-                </div>
-              ) : (
-                <TokenSearch
-                  onTokenSelect={(token) => {
-                    form.setFieldValue("token.address", token.address);
-                    form.setFieldValue("token.symbol", token.symbol);
-                  }}
+                  alt="Cover Input"
+                  width={40}
+                  height={45}
+                  className="absolute top-6 right-6"
                 />
               )}
-              <div className="text-xs text-gray-700 flex items-center gap-1 mt-1">
-                <div>
-                  {form.state.values.token.isClanker
-                    ? "I already have a token."
-                    : "I don't have a token."}
+              <input
+                id="cover-input"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleBannerChange}
+              />
+            </div>
+            <div
+              className="cursor-pointer absolute -bottom-6 left-1/2 -translate-x-1/2 w-20 h-20 flex items-center justify-center rounded-full group"
+              onClick={() => document.getElementById("pfp-input")?.click()}
+            >
+              {form.state.values.pfp ? (
+                <Image
+                  src={URL.createObjectURL(form.state.values.pfp)}
+                  alt="PFP"
+                  width={80}
+                  height={80}
+                  className="rounded-full w-20 h-20 object-cover group-hover:brightness-50"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center group-hover:bg-gray-800 transition-colors">
+                  <Image
+                    src="/images/pfp-input.png"
+                    alt="Upload Image"
+                    width={36}
+                    height={40}
+                    className="opacity-100 group-hover:opacity-80"
+                  />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newIsClanker = !form.state.values.token.isClanker;
-                    form.setFieldValue("token.isClanker", newIsClanker);
-                    form.setFieldValue("token.address", "");
-                    form.setFieldValue("token.symbol", "");
-                  }}
-                  className="text-primary font-bold hover:underline cursor-pointer"
-                >
-                  {form.state.values.token.isClanker
-                    ? "SEARCH for my token."
-                    : "CREATE ONE for me."}
-                </button>
-              </div>
+              )}
+              <input
+                id="pfp-input"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePFPChange}
+              />
             </div>
           </div>
 
-          <div className="mt-2">
-            <div className="flex flex-col gap-2">
-              <label className="uppercase text-xs" htmlFor="channel-about">
-                About Channel
-              </label>
-              <form.Field
-                name="channelAbout"
-                validators={{
-                  onChange: ({ value }) =>
-                    !value?.trim() ? "Channel description is required" : undefined,
-                }}
-              >
-                {(field) => (
-                  <>
-                    <Textarea
-                      id="channel-about"
-                      className="text-sm h-24"
-                      placeholder="Write about your channel here"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                    />
-                    {field.state.meta.errors.length > 0 && (
-                      <div className="text-red-500 text-xs mt-1">
-                        {field.state.meta.errors[0]}
-                      </div>
-                    )}
-                  </>
-                )}
-              </form.Field>
-            </div>
-          </div>
-
-          <div className="mt-3 flex items-center gap-3">
-            <div className="flex flex-col gap-2 flex-1">
-              <label className="uppercase text-xs" htmlFor="channel-handle">
-                Channel Handle
-              </label>
-              <div className="flex items-stretch rounded-base shadow-small">
-                <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
-                  den.show/
-                </div>
+          <div className="mt-6 px-4">
+            <div className="flex items-start gap-3">
+              <div className="flex flex-1 flex-col gap-2">
+                <label className="uppercase text-xs" htmlFor="channel-name">
+                  Channel Name
+                </label>
                 <form.Field
-                  name="channelHandle"
+                  name="channelName"
                   validators={{
-                    onChange: ({ value }) => {
-                      if (!value?.trim()) return "Channel handle is required";
-                      if (RESERVED_HANDLES.includes(value.toLowerCase())) {
-                        return "This handle is reserved";
-                      }
-                      return undefined;
-                    },
+                    onChange: ({ value }) =>
+                      !value?.trim() ? "Channel name is required" : undefined,
                   }}
                 >
                   {(field) => (
-                    <Input
-                      maxLength={30}
-                      className="flex-1 outline-none text-sm px-2.5 h-10 border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                      type="text"
-                      placeholder="your-channel-handle"
-                      value={field.state.value}
-                      onChange={(e) => {
-                        const value = e.target.value.toLowerCase();
-                        field.handleChange(value);
-                      }}
-                      onBlur={field.handleBlur}
-                    />
+                    <>
+                      <Input
+                        maxLength={30}
+                        id="channel-name"
+                        placeholder="@mizanxali's Den"
+                        className="text-sm h-10 shadow-small"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      {field.state.meta.errors.length > 0 && (
+                        <div className="text-red-500 text-xs mt-1">
+                          {field.state.meta.errors[0]?.toString()}
+                        </div>
+                      )}
+                    </>
                   )}
                 </form.Field>
               </div>
-              <div className="text-xs text-gray-700">
-                {RESERVED_HANDLES.includes(
-                  form.state.values.channelHandle.toLowerCase()
-                ) ? (
-                  <span className="text-red-500">Invalid handle</span>
-                ) : isLoadingHandleAvailable ? (
-                  <span className="invisible">
-                    Checking if handle is available...
-                  </span>
-                ) : !isLoadingHandleAvailable &&
-                  isFetchedHandleAvailable &&
-                  !isHandleAvailable ? (
-                  <span className="text-red-500">Handle is already taken</span>
+
+              <div className="flex flex-1 flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <label className="uppercase text-xs" htmlFor="symbol">
+                    Channel Token Ticker
+                  </label>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Image
+                        src="/icons/info.svg"
+                        alt="Info"
+                        width={16}
+                        height={16}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Search for any token - Zora, Clanker, anything.</p>
+                      <p>
+                        This will be your permanent Channel ticker. You won't be
+                        able to change it later.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                {form.state.values.token.isClanker ? (
+                  <div className="flex rounded-base items-stretch shadow-small">
+                    <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
+                      $
+                    </div>
+                    <form.Field
+                      name="token.symbol"
+                      validators={{
+                        onChange: ({ value }) =>
+                          !value?.trim()
+                            ? "Token symbol is required"
+                            : undefined,
+                      }}
+                    >
+                      {(field) => (
+                        <>
+                          <Input
+                            maxLength={10}
+                            className="flex-1 outline-none text-sm px-2.5 h-10 border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                            id="symbol"
+                            placeholder="BTC"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                          />
+                          {field.state.meta.errors.length > 0 && (
+                            <div className="text-red-500 text-xs mt-1">
+                              {field.state.meta.errors[0]?.toString()}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </form.Field>
+                  </div>
                 ) : (
-                  <span className="invisible">Handle is available</span>
+                  <TokenSearch
+                    onTokenSelect={(token) => {
+                      form.setFieldValue("token.address", token.address);
+                      form.setFieldValue("token.symbol", token.symbol);
+                    }}
+                  />
                 )}
+                <div className="text-xs text-gray-700 flex items-center gap-1 mt-1">
+                  <div>
+                    {reactiveIsClanker
+                      ? "I already have a token."
+                      : "I don't have a token."}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newIsClanker = !reactiveIsClanker;
+                      form.setFieldValue("token.isClanker", newIsClanker);
+                    }}
+                    className="text-primary font-bold hover:underline cursor-pointer"
+                  >
+                    {reactiveIsClanker
+                      ? "SEARCH for my token."
+                      : "CREATE ONE for me."}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 h-full self-stretch flex-1">
-              <label className="uppercase text-xs" htmlFor="language">
-                Select Language [for chat]
-              </label>
-              <form.Field
-                name="language"
-                validators={{
-                  onChange: ({ value }) =>
-                    !value ? "Language is required" : undefined,
-                }}
-              >
-                {(field) => (
-                  <Select
-                    value={field.state.value}
-                    onValueChange={field.handleChange}
-                  >
-                    <SelectTrigger className="h-10 w-full shadow-small">
-                      <SelectValue
-                        placeholder="Select a language for chat"
-                        className="py-1"
-                      >
-                        {field.state.value}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="English">English</SelectItem>
-                      <SelectItem value="Spanish">Spanish</SelectItem>
-                      <SelectItem value="Portuguese">Portuguese</SelectItem>
-                      <SelectItem value="Chinese">Chinese</SelectItem>
-                      <SelectItem value="Russian">Russian</SelectItem>
-                      <SelectItem value="Vietnamese">Vietnamese</SelectItem>
-                      <SelectItem value="Filipino">Filipino</SelectItem>
-                      <SelectItem value="Korean">Korean</SelectItem>
-                      <SelectItem value="French">French</SelectItem>
-                      <SelectItem value="Japanese">Japanese</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              </form.Field>
+            <div className="mt-2">
+              <div className="flex flex-col gap-2">
+                <label className="uppercase text-xs" htmlFor="channel-about">
+                  About Channel
+                </label>
+                <form.Field
+                  name="channelAbout"
+                  validators={{
+                    onChange: ({ value }) =>
+                      !value?.trim()
+                        ? "Channel description is required"
+                        : undefined,
+                  }}
+                >
+                  {(field) => (
+                    <>
+                      <Textarea
+                        id="channel-about"
+                        className="text-sm h-24"
+                        placeholder="Write about your channel here"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      {field.state.meta.errors.length > 0 && (
+                        <div className="text-red-500 text-xs mt-1">
+                          {field.state.meta.errors[0]?.toString()}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </form.Field>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center space-x-2 mt-3">
-            <form.Field
-              name="nsfw"
-            >
-              {(field) => (
-                <Switch
-                  id="18-plus"
-                  checked={field.state.value}
-                  onCheckedChange={field.handleChange}
-                />
-              )}
-            </form.Field>
-            <Label htmlFor="18-plus" className="font-base text-sm">
-              My channel caters to 18+ audience only
-            </Label>
-          </div>
+            <div className="mt-3 flex items-center gap-3">
+              <div className="flex flex-col gap-2 flex-1">
+                <label className="uppercase text-xs" htmlFor="channel-handle">
+                  Channel Handle
+                </label>
+                <div className="flex items-stretch rounded-base shadow-small">
+                  <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
+                    den.show/
+                  </div>
+                  <form.Field
+                    name="channelHandle"
+                    validators={{
+                      onChange: ({ value }) => {
+                        if (!value?.trim()) return "Channel handle is required";
+                        if (RESERVED_HANDLES.includes(value.toLowerCase())) {
+                          return "This handle is reserved";
+                        }
+                        return undefined;
+                      },
+                    }}
+                  >
+                    {(field) => (
+                      <Input
+                        maxLength={30}
+                        className="flex-1 outline-none text-sm px-2.5 h-10 border-l-0 rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        type="text"
+                        placeholder="your-channel-handle"
+                        value={field.state.value}
+                        onChange={(e) => {
+                          const value = e.target.value.toLowerCase();
+                          field.handleChange(value);
+                        }}
+                        onBlur={field.handleBlur}
+                      />
+                    )}
+                  </form.Field>
+                </div>
+                <div className="text-xs text-gray-700">
+                  {RESERVED_HANDLES.includes(
+                    form.state.values.channelHandle.toLowerCase()
+                  ) ? (
+                    <span className="text-red-500">Invalid handle</span>
+                  ) : isLoadingHandleAvailable ? (
+                    <span className="invisible">
+                      Checking if handle is available...
+                    </span>
+                  ) : !isLoadingHandleAvailable &&
+                    isFetchedHandleAvailable &&
+                    !isHandleAvailable ? (
+                    <span className="text-red-500">
+                      Handle is already taken
+                    </span>
+                  ) : (
+                    <span className="invisible">Handle is available</span>
+                  )}
+                </div>
+              </div>
 
-          <div className="flex items-center space-x-2 mt-3">
-            <form.Field
-              name="tncAccepted"
-              validators={{
-                onChange: ({ value }) =>
-                  !value ? "You must accept the terms and conditions" : undefined,
-              }}
-            >
-              {(field) => (
-                <>
+              <div className="flex flex-col gap-2 h-full self-stretch flex-1">
+                <label className="uppercase text-xs" htmlFor="language">
+                  Select Language [for chat]
+                </label>
+                <form.Field
+                  name="language"
+                  validators={{
+                    onChange: ({ value }) =>
+                      !value ? "Language is required" : undefined,
+                  }}
+                >
+                  {(field) => (
+                    <Select
+                      value={field.state.value}
+                      onValueChange={field.handleChange}
+                    >
+                      <SelectTrigger className="h-10 w-full shadow-small">
+                        <SelectValue
+                          placeholder="Select a language for chat"
+                          className="py-1"
+                        >
+                          {field.state.value}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Spanish">Spanish</SelectItem>
+                        <SelectItem value="Portuguese">Portuguese</SelectItem>
+                        <SelectItem value="Chinese">Chinese</SelectItem>
+                        <SelectItem value="Russian">Russian</SelectItem>
+                        <SelectItem value="Vietnamese">Vietnamese</SelectItem>
+                        <SelectItem value="Filipino">Filipino</SelectItem>
+                        <SelectItem value="Korean">Korean</SelectItem>
+                        <SelectItem value="French">French</SelectItem>
+                        <SelectItem value="Japanese">Japanese</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </form.Field>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 mt-3">
+              <form.Field name="nsfw">
+                {(field) => (
                   <Switch
-                    id="tnc"
+                    id="18-plus"
                     checked={field.state.value}
                     onCheckedChange={field.handleChange}
                   />
-                  {field.state.meta.errors.length > 0 && (
-                    <div className="text-red-500 text-xs mt-1">
-                      {field.state.meta.errors[0]}
-                    </div>
-                  )}
-                </>
-              )}
-            </form.Field>
-            <Label htmlFor="tnc" className="font-base text-sm">
-              I've read the content & moderation Community Guidelines and agree
-              to Den's T&C & Privacy Policy
-            </Label>
-          </div>
+                )}
+              </form.Field>
+              <Label htmlFor="18-plus" className="font-base text-sm">
+                My channel caters to 18+ audience only
+              </Label>
+            </div>
 
-          <div className="mt-4 flex justify-end">
-            <Button
-              type="submit"
-              className="w-36"
-              disabled={
-                !isFormValid ||
-                isLoadingHandleAvailable ||
-                !isHandleAvailable ||
-                RESERVED_HANDLES.includes(form.state.values.channelHandle.toLowerCase())
-              }
-            >
-              {isCreatingChannel ? "Processing..." : "Next"}
-            </Button>
+            <div className="flex items-center space-x-2 mt-3">
+              <form.Field
+                name="tncAccepted"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value
+                      ? "You must accept the terms and conditions"
+                      : undefined,
+                }}
+              >
+                {(field) => (
+                  <>
+                    <Switch
+                      id="tnc"
+                      checked={field.state.value}
+                      onCheckedChange={field.handleChange}
+                    />
+                    {field.state.meta.errors.length > 0 && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {field.state.meta.errors[0]?.toString()}
+                      </div>
+                    )}
+                  </>
+                )}
+              </form.Field>
+              <Label htmlFor="tnc" className="font-base text-sm">
+                I've read the content & moderation Community Guidelines and
+                agree to Den's T&C & Privacy Policy
+              </Label>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <Button
+                type="submit"
+                className="w-36"
+                disabled={
+                  !isFormValid ||
+                  isLoadingHandleAvailable ||
+                  !isHandleAvailable ||
+                  RESERVED_HANDLES.includes(
+                    form.state.values.channelHandle.toLowerCase()
+                  )
+                }
+              >
+                {isCreatingChannel ? "Processing..." : "Next"}
+              </Button>
+            </div>
           </div>
-        </div>
         </form>
       )}
 

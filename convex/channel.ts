@@ -129,7 +129,16 @@ export const getMyChannel = query({
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .first();
 
-    return channel;
+    if (!channel) {
+      return null;
+    }
+
+    const creds = await ctx.db
+      .query("channelCreds")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channel._id))
+      .first();
+
+    return { ...channel, creds };
   },
 });
 
