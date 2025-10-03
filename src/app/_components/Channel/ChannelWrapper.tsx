@@ -12,10 +12,7 @@ interface ChannelWrapperProps {
 }
 
 const ChannelWrapper = ({ handle }: ChannelWrapperProps) => {
-  // Dummy query for channel.getPublicChannelDetails.useQuery({
-    handle,
-  })
-  const data = { data: [], isLoading: false, error: null };
+  const channel = null;
 
   // TODO: Add skeleton loading
 

@@ -32,19 +32,19 @@ export const createMuxStreamKey = internalAction({
   },
 });
 
-export const changeLiveStreamState = internalAction({
-  args: {
-    muxStreamId: v.string(),
-    state: v.union(v.literal("enable"), v.literal("disable")),
-  },
-  handler: async (_, args) => {
-    if (args.state === "enable") {
-      await mux.video.liveStreams.enable(args.muxStreamId);
-    } else {
-      await mux.video.liveStreams.disable(args.muxStreamId);
-    }
-  },
-});
+// export const changeLiveStreamState = internalAction({
+//   args: {
+//     muxStreamId: v.string(),
+//     state: v.union(v.literal("enable"), v.literal("disable")),
+//   },
+//   handler: async (_, args) => {
+//     if (args.state === "enable") {
+//       await mux.video.liveStreams.enable(args.muxStreamId);
+//     } else {
+//       await mux.video.liveStreams.disable(args.muxStreamId);
+//     }
+//   },
+// });
 
 export const handleWebhook = internalAction({
   args: {
@@ -59,6 +59,19 @@ export const handleWebhook = internalAction({
     switch (event.type) {
       case "video.live_stream.active": {
         const streamId = event.data.id;
+
+        // TODO: update after switching to all private streams
+        const playbackId = event.data.playback_ids?.find(
+          (p) => p.policy === "public"
+        )?.id;
+
+        if (!playbackId) {
+          console.error(
+            "No public playback ID found for stream though stream is active:",
+            streamId
+          );
+          break;
+        }
 
         break;
       }

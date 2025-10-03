@@ -5,15 +5,15 @@ import MuxPlayer from "@mux/mux-player-react";
 interface MuxPlayerProps {
   playbackId: string;
   streamId: string;
-  title?: string;
+  title: string;
   className?: string;
 }
 
-const MuxPlayerComponent = ({ 
-  playbackId, 
-  streamId, 
-  title = "Live Stream",
-  className = "w-full h-full"
+const MuxPlayerComponent = ({
+  playbackId,
+  streamId,
+  title,
+  className = "w-full h-full",
 }: MuxPlayerProps) => {
   return (
     <div className={className}>
