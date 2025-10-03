@@ -26,6 +26,12 @@ export const insertUser = internalMutation({
     email: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const user = await getUserFromCtx(ctx);
+
+    if (user) {
+      return;
+    }
+
     await ctx.db.insert("users", {
       loginMethod: args.loginMethod,
       privyId: args.privyId,
