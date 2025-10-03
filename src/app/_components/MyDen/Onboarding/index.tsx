@@ -179,13 +179,6 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
             className="cursor-pointer absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 h-28 flex items-center justify-center rounded-full group"
             onClick={() => document.getElementById("pfp-input")?.click()}
           >
-            <Image
-              src="/images/pfp-input.png"
-              alt="Cover Input"
-              width={51}
-              height={57}
-              className="hidden group-hover:block absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10"
-            />
             {formData.pfp ? (
               <Image
                 src={URL.createObjectURL(formData.pfp)}
@@ -195,13 +188,15 @@ const Onboarding = ({ onOnboardingComplete }: OnboardingProps) => {
                 className="rounded-full w-28 h-28 object-cover group-hover:brightness-50"
               />
             ) : (
-              <Image
-                src="/images/default-channel-logo.png"
-                alt="PFP Input"
-                width={112}
-                height={112}
-                className="rounded-full w-28 h-28 object-cover group-hover:brightness-50"
-              />
+              <div className="w-28 h-28 rounded-full bg-black flex items-center justify-center group-hover:bg-gray-800 transition-colors">
+                <Image
+                  src="/images/pfp-input.png"
+                  alt="Upload Image"
+                  width={51}
+                  height={57}
+                  className="opacity-100 group-hover:opacity-80"
+                />
+              </div>
             )}
             <input
               id="pfp-input"

@@ -55,40 +55,56 @@ const FanPassModalContent = ({
           den.show/{channelHandle}
         </div>
       </div>
-      <div className="max-w-full flex items-center justify-between">
-        <div className="font-cream-medium text-2xl text-[#413E3E]">
-          [ $1000 {creatorTokenSymbol} ]
+      <div className="w-full flex gap-8">
+        {/* Left side - Perks */}
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="font-medium text-sm">
+            {isCreatingChannel
+              ? `FANs will have to hold ${creatorTokenSymbol} to back you, and unlock exclusive perks:`
+              : `HODL $X worth of tokens, back @${channelHandle}, and unlock these exclusive perks:`}
+          </div>
+          <Card className="w-full p-2.5 text-sm flex flex-col gap-1">
+            <div>Earn Revenue Share</div>
+            <div className="text-[#9da3ac] text-xs">
+              % of creator's trading fees & tips
+            </div>
+          </Card>
+          <Card className="w-full p-2.5 text-sm flex flex-col gap-1">
+            <div>Clip & Earn Rewards</div>
+            <div className="text-[#9da3ac] text-xs">
+              Create clips, earn as per views/fans you drive
+            </div>
+          </Card>
+          <Card className="w-full p-2.5 text-sm flex flex-col gap-1">
+            <div>Exclusive Live Events</div>
+            <div className="text-[#9da3ac] text-xs">
+              Fans-only streams & sessions
+            </div>
+          </Card>
         </div>
-        {!isCreatingChannel && (
-          <Button variant="primary" onClick={() => {}}>
-            Get Fan Pass
-          </Button>
-        )}
+
+        {/* Right side - Price */}
+        <div className="flex flex-col items-end gap-4">
+          <div className="text-right">
+            <div className="text-[#9da3ac] text-sm">Price</div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold text-black">10</span>
+              <span className="text-lg text-black">USDC</span>
+            </div>
+            <div className="border-b border-dotted border-gray-400 w-full mt-2"></div>
+            <div className="text-[#9da3ac] text-sm mt-2">= [1000{creatorTokenSymbol}]</div>
+          </div>
+          
+          <div className="text-right">
+            <div className="text-[#9da3ac] text-sm">Step 2 of 2</div>
+            {!isCreatingChannel && (
+              <Button variant="primary" onClick={() => {}} className="mt-2">
+                Get Fan Pass
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="font-medium text-sm">
-        {isCreatingChannel
-          ? `FANs will have to hold ${creatorTokenSymbol} to back you, and unlock exclusive perks:`
-          : `HODL ${creatorTokenSymbol} tokens, back @${channelHandle}, and unlock
-        these exclusive perks:`}
-      </div>
-      <Card className="w-full p-2.5 text-sm flex flex-col gap-1">
-        <div> Earn Revenue Share</div>
-        <div className="text-[#9da3ac] text-xs">
-          % of creator's trading fees & tips
-        </div>
-      </Card>
-      <Card className="w-full p-2.5 text-sm flex flex-col gap-1">
-        <div>Clip & Earn Rewards</div>
-        <div className="text-[#9da3ac] text-xs">
-          Create clips, earn as per views/fans you drive
-        </div>
-      </Card>
-      <Card className="w-full p-2.5 text-sm flex flex-col gap-1">
-        <div>Exclusive Live Events</div>
-        <div className="text-[#9da3ac] text-xs">
-          Fans-only streams & sessions
-        </div>
-      </Card>
     </>
   );
 };
