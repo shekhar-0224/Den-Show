@@ -1,10 +1,9 @@
 "use client";
 
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useWallets } from "@privy-io/react-auth";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
@@ -16,10 +15,10 @@ import {
 } from "~/components/ui/dialog";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
-import StartStream from "../GoLive/StartStream";
-import Onboarding from "../MyDen/Onboarding";
-import ChannelVerificationPopup from "../MyDen/ChannelVerificationPopup";
 import { useFileUpload } from "../../_hooks/useFileUpload";
+import StartStream from "../GoLive/StartStream";
+import ChannelVerificationPopup from "../MyDen/ChannelVerificationPopup";
+import Onboarding from "../MyDen/Onboarding";
 import GlobalSearch from "./GlobalSearch";
 import LoginButton from "./LoginButton";
 import { Logout } from "./Logout";
@@ -29,7 +28,6 @@ const Navbar = () => {
   const createChannel = useMutation(api.channel.createChannel);
   const { mutateAsync: uploadFile } = useFileUpload();
   const { wallets } = useWallets();
-  const router = useRouter();
 
   const embedWallet = wallets?.find((w) => w.connectorType === "embedded");
 
@@ -100,7 +98,6 @@ const Navbar = () => {
       toast.success("Channel created successfully");
       setIsVerificationOpen(false);
       setVerificationData(null);
-      router.push("/my-den");
     } catch (error) {
       console.error("Error creating channel:", error);
       toast.error("Failed to create channel. Please try again.");
