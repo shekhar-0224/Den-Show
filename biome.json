@@ -24,7 +24,8 @@
         "noSvgWithoutTitle": "off",
         "useKeyWithClickEvents": "off",
         "noStaticElementInteractions": "off",
-        "useButtonType": "off"
+        "useButtonType": "off",
+        "noLabelWithoutControl": "off"
       },
       "correctness": {
         "useExhaustiveDependencies": "warn"

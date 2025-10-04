@@ -4,7 +4,7 @@ import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { useMobile } from "~/app/_hooks/useMobile";
-import type { api } from "../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import SideDrawer from "../LiveStream/SideDrawer";
 import StreamDetails from "../LiveStream/StreamDetails";
 import MuxPlayerComponent from "./MuxPlayer";
@@ -15,11 +15,14 @@ const WatchContent = ({
   preLoadedStream: Preloaded<typeof api.stream.getStream>;
 }) => {
   const streamData = usePreloadedQuery(preLoadedStream);
+  const myChannel = useQuery(api.channel.getMyChannel);
 
   const [isSideDrawerOpen, setIsSideDrawerOpen] = useState(true);
   const { isMobile } = useMobile();
 
   if (!streamData) return <div>Stream not found</div>;
+
+  const isMyStream = myChannel?._id === streamData.channel._id;
 
   return (
     <div className="bg-black text-white h-full p-4 flex flex-col md:flex-row gap-4 overflow-hidden">
@@ -41,9 +44,9 @@ const WatchContent = ({
               playbackId={
                 streamData.stream.playbackId ?? streamData.channel.playbackId
               }
-              isMyStream={streamData.isMyStream}
+              isMyStream={isMyStream}
               rtmpUrl="rtmp://global-live.mux.com:5222/app"
-              streamKey={streamData.channel.creds?.muxStreamKey ?? ""}
+              streamKey={myChannel?.creds?.muxStreamKey ?? ""}
             />
           </div>
 
