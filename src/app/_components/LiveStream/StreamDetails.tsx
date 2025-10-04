@@ -99,96 +99,6 @@ const StreamDetails = ({ streamId }: { streamId: Id<"streams"> }) => {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex flex-1 items-center gap-4">
-              {isMyStream && (
-                <div className="flex items-center gap-2">
-                  <div className="font-cream-medium">
-                    {isStreamUrlVisible
-                      ? "rtmp://global-live.mux.com:5222/app"
-                      : "RTMP URL"}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        "rtmp://global-live.mux.com:5222/app"
-                      );
-                      toast.success("Copied Stream URL to clipboard");
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <Image
-                      src="/icons/copy.svg"
-                      alt="copy"
-                      width={14}
-                      height={15}
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsStreamUrlVisible(true);
-                      setTimeout(() => {
-                        setIsStreamUrlVisible(false);
-                      }, 3000);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <Image
-                      src="/icons/eye-hidden.svg"
-                      alt="show"
-                      width={14}
-                      height={15}
-                    />
-                  </button>
-                </div>
-              )}
-              {isMyStream && (
-                <div className="flex items-center gap-2">
-                  <div className="font-cream-medium">
-                    {isStreamKeyVisible
-                      ? myChannel.creds?.muxStreamKey
-                      : "Stream Key"}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        myChannel.creds?.muxStreamKey ?? ""
-                      );
-                      toast.success("Copied Stream Key to clipboard");
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <Image
-                      src="/icons/copy.svg"
-                      alt="copy"
-                      width={14}
-                      height={15}
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsStreamKeyVisible(true);
-                      setTimeout(() => {
-                        setIsStreamKeyVisible(false);
-                      }, 3000);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <Image
-                      src="/icons/eye-hidden.svg"
-                      alt="show"
-                      width={14}
-                      height={15}
-                    />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
         <div>
           {isMyStream ? (
@@ -303,92 +213,96 @@ const StreamDetails = ({ streamId }: { streamId: Id<"streams"> }) => {
         {isMyStream ? (
           <>
             {/* RTMP and Stream Key Container */}
-            <div className="flex items-center gap-8">
-              {/* RTMP Section */}
-              <div className="flex items-center gap-4">
-                <span className="font-cream-medium text-white text-lg">
-                  rtmp://global-live.mux.com:5222/app
-                </span>
+            <div className="flex items-center gap-2">
+            <div className="flex flex-1 items-center gap-4">
+              {isMyStream && (
                 <div className="flex items-center gap-2">
+                  <div className="font-cream-medium">
+                    {isStreamUrlVisible
+                      ? "rtmp://global-live.mux.com:5222/app"
+                      : "RTMP URL"}
+                  </div>
                   <button
+                    type="button"
                     onClick={() => {
                       navigator.clipboard.writeText(
                         "rtmp://global-live.mux.com:5222/app"
                       );
-                      toast.success("RTMP url copied to clipboard");
+                      toast.success("Copied Stream URL to clipboard");
                     }}
-                    className="w-6 h-6 flex items-center justify-center"
+                    className="cursor-pointer"
                   >
                     <Image
                       src="/icons/copy.svg"
-                      alt="Copy"
-                      width={16}
-                      height={16}
-                      className="text-white"
+                      alt="copy"
+                      width={14}
+                      height={15}
                     />
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
-                      // Toggle visibility logic would go here
-                      toast.success("Visibility toggled");
+                      setIsStreamUrlVisible(true);
+                      setTimeout(() => {
+                        setIsStreamUrlVisible(false);
+                      }, 3000);
                     }}
-                    className="w-6 h-6 flex items-center justify-center"
+                    className="cursor-pointer"
                   >
                     <Image
                       src="/icons/eye-hidden.svg"
-                      alt="Toggle Visibility"
-                      width={16}
-                      height={16}
-                      className="text-white"
+                      alt="show"
+                      width={14}
+                      height={15}
                     />
                   </button>
                 </div>
-              </div>
-
-              {/* Vertical Separator */}
-              <div className="w-px h-8 bg-white border-dashed border-l"></div>
-
-              {/* Stream Key Section */}
-              <div className="flex items-center gap-4">
-                <span className="font-cream-medium text-white text-lg">
-                  StreamKey
-                </span>
+              )}
+              {isMyStream && (
                 <div className="flex items-center gap-2">
+                  <div className="font-cream-medium">
+                    {isStreamKeyVisible
+                      ? myChannel.creds?.muxStreamKey
+                      : "Stream Key"}
+                  </div>
                   <button
+                    type="button"
                     onClick={() => {
                       navigator.clipboard.writeText(
-                        myChannel.creds?.muxStreamKey ?? "your-stream-key"
+                        myChannel.creds?.muxStreamKey ?? ""
                       );
-                      toast.success("Stream key copied to clipboard");
+                      toast.success("Copied Stream Key to clipboard");
                     }}
-                    className="w-6 h-6 flex items-center justify-center"
+                    className="cursor-pointer"
                   >
                     <Image
                       src="/icons/copy.svg"
-                      alt="Copy"
-                      width={16}
-                      height={16}
-                      className="text-white"
+                      alt="copy"
+                      width={14}
+                      height={15}
                     />
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
-                      // Toggle visibility logic would go here
-                      toast.success("Visibility toggled");
+                      setIsStreamKeyVisible(true);
+                      setTimeout(() => {
+                        setIsStreamKeyVisible(false);
+                      }, 3000);
                     }}
-                    className="w-6 h-6 flex items-center justify-center"
+                    className="cursor-pointer"
                   >
                     <Image
                       src="/icons/eye-hidden.svg"
-                      alt="Toggle Visibility"
-                      width={16}
-                      height={16}
-                      className="text-white"
+                      alt="show"
+                      width={14}
+                      height={15}
                     />
                   </button>
                 </div>
-              </div>
+              )}
             </div>
+          </div>
 
             {/* Stream Control Buttons Container */}
             <div className="flex items-center gap-4">
@@ -397,11 +311,11 @@ const StreamDetails = ({ streamId }: { streamId: Id<"streams"> }) => {
                 onClick={() => {
                   toast.success("Stream paused");
                 }}
-                className="flex items-center gap-3 border border-white text-white px-6 py-3 rounded-lg shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(255,255,255,1)] transition-all"
+                className="flex items-center gap-2 border border-white text-white px-4 py-2 rounded-lg shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(255,255,255,1)] transition-all"
                 style={{ backgroundColor: "#9ED7E0" }}
               >
-                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                  <div className="w-2 h-3 flex gap-0.5">
+                <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                  <div className="w-1.5 h-2 flex gap-0.5">
                     <div
                       className="w-0.5 h-full"
                       style={{ backgroundColor: "#9ED7E0" }}
@@ -412,7 +326,7 @@ const StreamDetails = ({ streamId }: { streamId: Id<"streams"> }) => {
                     ></div>
                   </div>
                 </div>
-                <span className="font-semibold text-sm uppercase">
+                <span className="font-semibold text-xs uppercase">
                   PAUSE STREAM
                 </span>
               </button>
@@ -422,26 +336,26 @@ const StreamDetails = ({ streamId }: { streamId: Id<"streams"> }) => {
                 onClick={() => {
                   toast.success("Stream ended");
                 }}
-                className="flex items-center gap-3 border border-white text-white px-6 py-3 rounded-lg shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(255,255,255,1)] transition-all"
+                className="flex items-center gap-2 border border-white text-white px-4 py-2 rounded-lg shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(255,255,255,1)] transition-all"
                 style={{ backgroundColor: "#B84944" }}
               >
-                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                  <div className="w-4 h-4 relative">
+                <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                  <div className="w-3 h-3 relative">
                     <div
-                      className="w-full h-2 rounded-t-full"
+                      className="w-full h-1.5 rounded-t-full"
                       style={{ backgroundColor: "#B84944" }}
                     ></div>
                     <div
-                      className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full"
+                      className="absolute top-0.5 left-1/2 transform -translate-x-1/2 w-0.5 h-0.5 rounded-full"
                       style={{ backgroundColor: "#B84944" }}
                     ></div>
                     <div
-                      className="absolute top-0.5 left-1/2 transform -translate-x-1/2 w-1.5 h-0.5 rounded-full"
+                      className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-0.5 rounded-full"
                       style={{ backgroundColor: "#B84944" }}
                     ></div>
                   </div>
                 </div>
-                <span className="font-semibold text-sm uppercase">
+                <span className="font-semibold text-xs uppercase">
                   END STREAM
                 </span>
               </button>

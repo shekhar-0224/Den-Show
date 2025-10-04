@@ -404,7 +404,7 @@ const Onboarding = ({
                 </div>
                 {form.state.values.token.isClanker ? (
                   <div className="flex rounded-base items-stretch shadow-small">
-                    <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
+                    <div className="bg-black text-sm text-white px-6 h-10 flex items-center rounded-l-base">
                       $
                     </div>
                     <form.Field
@@ -507,7 +507,7 @@ const Onboarding = ({
                   Channel Handle
                 </label>
                 <div className="flex items-stretch rounded-base shadow-small">
-                  <div className="bg-black text-sm text-white px-6 py-4 rounded-l-base">
+                  <div className="bg-black text-sm text-white px-6 h-10 flex items-center rounded-l-base">
                     den.show/
                   </div>
                   <form.Field

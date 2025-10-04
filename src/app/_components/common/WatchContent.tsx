@@ -34,13 +34,16 @@ const WatchContent = ({
         }}
       >
         <div className="mac-13:h-[111%] mac-13:w-[111%] mac-13:origin-[0%_0%] mac-13:scale-[0.9]">
-          <div className="w-full 2xl:w-3/4 mx-auto aspect-video">
+          <div className="w-full 2xl:w-3/4 mx-auto aspect-video relative">
             <MuxPlayerComponent
               title={streamData.stream.title}
               streamId={streamData.stream._id}
               playbackId={
                 streamData.stream.playbackId ?? streamData.channel.playbackId
               }
+              isMyStream={streamData.isMyStream}
+              rtmpUrl="rtmp://global-live.mux.com:5222/app"
+              streamKey={streamData.channel.creds?.muxStreamKey ?? ""}
             />
           </div>
 

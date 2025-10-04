@@ -75,7 +75,7 @@ const TokenSearch = ({ onTokenSelect }: TokenSearchProps) => {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full cursor-pointer md:max-w-[300px] h-10 px-3 py-6 bg-white border-2 border-border shadow-small rounded-md flex items-center justify-between text-sm "
+        className="w-full cursor-pointer md:max-w-[300px] h-10 px-3 bg-white border-2 border-border shadow-small rounded-md flex items-center justify-between text-sm "
       >
         {selectedToken ? (
           <span className="truncate">${selectedToken.symbol}</span>
