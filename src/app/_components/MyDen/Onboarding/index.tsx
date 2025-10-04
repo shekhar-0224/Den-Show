@@ -4,7 +4,7 @@ import { revalidateLogic, useForm, useStore } from "@tanstack/react-form";
 import { useMutation as useCvxMutation } from "convex/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
 import z from "zod";
@@ -141,6 +141,7 @@ const Onboarding = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
+        console.log("PFP file selected:", file);
         form.setFieldValue("pfp", file);
       }
     },
@@ -151,6 +152,7 @@ const Onboarding = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
+        console.log("Banner file selected:", file);
         form.setFieldValue("banner", file);
       }
     },
@@ -161,6 +163,14 @@ const Onboarding = ({
     form.state.values.channelHandle,
     500
   );
+
+  // for Debugging form state
+  useEffect(() => {
+    console.log("Form state updated:", {
+      banner: form.state.values.banner,
+      pfp: form.state.values.pfp
+    });
+  }, [form.state.values.banner, form.state.values.pfp]);
 
   // Handle availability check
   const isHandleAvailable = useMemo(() => {
@@ -279,70 +289,78 @@ const Onboarding = ({
           className="w-full max-w-[580px] mx-auto"
         >
           <div className="w-full relative">
-            <div
-              className={cn(
-                "cursor-pointer w-full relative h-[120px]",
-                !form.state.values.banner && "bg-primary"
-              )}
-              onClick={() => document.getElementById("cover-input")?.click()}
-            >
-              {form.state.values.banner ? (
-                <Image
-                  src={URL.createObjectURL(form.state.values.banner)}
-                  alt="Cover"
-                  width={0}
-                  height={0}
-                  sizes="100vw"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <Image
-                  src="/images/pfp-input.png"
-                  alt="Cover Input"
-                  width={40}
-                  height={45}
-                  className="absolute top-6 right-6"
-                />
-              )}
-              <input
-                id="cover-input"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleBannerChange}
-              />
-            </div>
-            <div
-              className="cursor-pointer absolute -bottom-6 left-1/2 -translate-x-1/2 w-20 h-20 flex items-center justify-center rounded-full group"
-              onClick={() => document.getElementById("pfp-input")?.click()}
-            >
-              {form.state.values.pfp ? (
-                <Image
-                  src={URL.createObjectURL(form.state.values.pfp)}
-                  alt="PFP"
-                  width={80}
-                  height={80}
-                  className="rounded-full w-20 h-20 object-cover group-hover:brightness-50"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center group-hover:bg-gray-800 transition-colors">
-                  <Image
-                    src="/images/pfp-input.png"
-                    alt="Upload Image"
-                    width={36}
-                    height={40}
-                    className="opacity-100 group-hover:opacity-80"
+            <form.Field name="banner">
+              {(field) => (
+                <div
+                  className={cn(
+                    "cursor-pointer w-full relative h-[120px]",
+                    !field.state.value && "bg-primary"
+                  )}
+                  onClick={() => document.getElementById("cover-input")?.click()}
+                >
+                  {field.state.value ? (
+                    <Image
+                      src={URL.createObjectURL(field.state.value)}
+                      alt="Cover"
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src="/images/pfp-input.png"
+                      alt="Cover Input"
+                      width={40}
+                      height={45}
+                      className="absolute top-6 right-6"
+                    />
+                  )}
+                  <input
+                    id="cover-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleBannerChange}
                   />
                 </div>
               )}
-              <input
-                id="pfp-input"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handlePFPChange}
-              />
-            </div>
+            </form.Field>
+            <form.Field name="pfp">
+              {(field) => (
+                <div
+                  className="cursor-pointer absolute -bottom-6 left-1/2 -translate-x-1/2 w-20 h-20 flex items-center justify-center rounded-full group"
+                  onClick={() => document.getElementById("pfp-input")?.click()}
+                >
+                  {field.state.value ? (
+                    <Image
+                      src={URL.createObjectURL(field.state.value)}
+                      alt="PFP"
+                      width={80}
+                      height={80}
+                      className="rounded-full w-20 h-20 object-cover group-hover:brightness-50"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center group-hover:bg-gray-800 transition-colors">
+                      <Image
+                        src="/images/pfp-input.png"
+                        alt="Upload Image"
+                        width={36}
+                        height={40}
+                        className="opacity-100 group-hover:opacity-80"
+                      />
+                    </div>
+                  )}
+                  <input
+                    id="pfp-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePFPChange}
+                  />
+                </div>
+              )}
+            </form.Field>
           </div>
 
           <div className="mt-6 px-4">
