@@ -53,7 +53,6 @@ export default function useLogin() {
 
     onError: (error) => {
       console.error("Login error:", error);
-      alert("Login error: ");
       posthog.capture("login-error", { error });
     },
   });
